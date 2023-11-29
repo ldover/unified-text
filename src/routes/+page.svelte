@@ -67,18 +67,27 @@ As text
 		</div>
 	</div>
 
-	<Editor on:mount={onEditorMount}></Editor>
+	<div class="editor-container">
+		<Editor on:mount={onEditorMount}></Editor>
+	</div>
 </div>
 
 <style>
+	.editor-container {
+		width: 800px;
+		height: 700px;
+		max-height: 700px;
+		border: 1px solid black;
+	}
+
 	.page {
+		overflow-y: hidden;
 		display: flex;
-		height: 100%;
+		height: 100vh;
 	}
 
 	.controls {
 		width: 300px;
-		height: 100%;
 		border: 1px solid black;
 		padding: 8px;
 	}

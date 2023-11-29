@@ -45,7 +45,6 @@ export const bearTheme = (options?: BearThemeOptions) => {
 		{
 			'&': {
 				width: '100%',
-				alignItems: 'center',
 				paddingTop: '16px',
 				height: '100%',
 				color: '#1f1f1f',
@@ -59,7 +58,9 @@ export const bearTheme = (options?: BearThemeOptions) => {
 				maxHeight: '300px'
 			},
 			'.cm-scroller': {
-				paddingTop: '24px'
+				paddingTop: '24px',
+				width: "100%",
+				justifyContent: "center"
 			},
 			'.cm-content': {
 				caretColor: color.red,

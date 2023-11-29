@@ -10,10 +10,11 @@
 	});
 </script>
 
-<div class="h-full relative">
-	<div bind:this={el} class="h-full"></div>
-	<div class="absolute bottom-0 left-0 w-full"></div>
-</div>
+<div bind:this={el}></div>
 
 <style>
+	div {
+		width: 100%;
+        height: 100%;
+	}
 </style>
