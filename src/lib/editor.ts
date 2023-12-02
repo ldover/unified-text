@@ -3,7 +3,7 @@ import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
 import { type KeyBinding, keymap } from '@codemirror/view';
-import {type MarkdownConfig, Strikethrough} from '@lezer/markdown';
+import {type MarkdownConfig, Strikethrough, TaskList} from '@lezer/markdown';
 import {styleTags, tags} from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
@@ -64,7 +64,7 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 			basicSetup,
 			bear,
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
-			markdown({ codeLanguages: languages, extensions: [Strikethrough, ExtendedStyles] }),
+			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({
 				activateOnTyping: true,
 				override: [(context) => mdAutocomplete.autocomplete(context)]

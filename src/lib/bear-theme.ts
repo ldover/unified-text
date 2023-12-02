@@ -1,10 +1,12 @@
 /// Extension to enable the Bear theme for a configured MarkdownParser:
-// MarkdownParser was configured with the following tags, which override default style tags and enable us to style
-// Markdown in a more granular way:
+// MarkdownParser should be configured with the following tags, which enable us to style Markdown in a more granular way:
 // 	- "HeaderMark": tags.heading,
 // 	- "ListMark QuoteMark HardBreak": tags.special(tags.processingInstruction),
 // 	- "CodeText": tags.special(tags.monospace),
 // 	- "CodeInfo": tags.special(tags.labelName),
+// And it depends on these extensions:
+// - Strikethrough
+// - TaskList
 //
 import type { Extension } from '@codemirror/state';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
@@ -210,7 +212,8 @@ export const bearHighlightStyle = HighlightStyle.define([
 	{
 		tag: [
 			tags.url,
-			tags.special(tags.processingInstruction) // ListMark, QuoteMark, HardBreak
+			tags.special(tags.processingInstruction), // ListMark, QuoteMark, HardBreak
+			t.atom  // TaskMarker (TaskList extension)
 		],
 		color: color.red
 	},

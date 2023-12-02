@@ -28,6 +28,10 @@ And blockquote:
 And a hardbreak\\
 with text continuing on next line.
 
+And a few tasks:
+* [ ] Code a Bear theme
+* [ ] Code a Knowledge Universe theme
+
 ## Heading 2
 Some text.
 
