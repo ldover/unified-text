@@ -15,9 +15,18 @@ Unordered:
 
 Code \`inline\` and code block —
 
-\`\`\`javascript
+\`\`\`
 const test = 'code block'
 \`\`\`
+
+
+And blockquote:
+
+> "If I have 10 hours to cut down a tree I will spend the first few hours sharpening the axe."
+> Lincoln
+
+And a hardbreak\\
+with text continuing on next line.
 
 ## Heading 2
 Some text.

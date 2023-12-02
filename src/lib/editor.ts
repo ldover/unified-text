@@ -18,7 +18,9 @@ export const ExtendedStyles: MarkdownConfig = {
 	props: [
 		styleTags({
 			"HeaderMark": tags.heading,
-			"ListMark": tags.special(tags.processingInstruction),
+			"ListMark QuoteMark HardBreak": tags.special(tags.processingInstruction),
+			"CodeText": tags.special(tags.monospace),
+			"CodeInfo": tags.special(tags.labelName),
 		})
 	]
 }

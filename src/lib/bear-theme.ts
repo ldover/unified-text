@@ -1,4 +1,11 @@
-/// Extension to enable the Bear theme
+/// Extension to enable the Bear theme for a configured MarkdownParser:
+// MarkdownParser was configured with the following tags, which override default style tags and enable us to style
+// Markdown in a more granular way:
+// 	- "HeaderMark": tags.heading,
+// 	- "ListMark QuoteMark HardBreak": tags.special(tags.processingInstruction),
+// 	- "CodeText": tags.special(tags.monospace),
+// 	- "CodeInfo": tags.special(tags.labelName),
+//
 import type { Extension } from '@codemirror/state';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
@@ -7,7 +14,8 @@ import { tags as t, tags } from '@lezer/highlight';
 const headingGray = '#444444',
 	fontGray = '#464646',
 	linkBracketGray = '#D9D9D9',
-	codeBlockGrayBackground = '#F3F5F7',
+	// Note: background should be transparent so other styles like selection remain visible
+	codeBlockGrayBackground = 'rgba(240, 240, 240, 0.5)',
 	selectionBackground = '#E8F2FC',
 	dropdownSelectionBackground = '#ECECED',
 	dropdownBorder = '#BEBEBE',
@@ -121,6 +129,9 @@ export const bearTheme = (options?: BearThemeOptions) => {
 };
 
 export const bearHighlightStyle = HighlightStyle.define([
+	//
+	// Markdown style tags
+	//
 	{
 		tag: tags.link,
 		textDecoration: 'none',
@@ -169,9 +180,15 @@ export const bearHighlightStyle = HighlightStyle.define([
 		fontWeight: 'normal',
 	},
 	{
-		tag: tags.monospace,
+		tag: tags.monospace, // InlineCode
 		fontFamily: 'Roboto Mono, monospace',
-		color: color.strikethroughGray
+		backgroundColor: color.codeBlockGrayBackground,
+		color: color.fontGray,
+	},
+	{
+		tag: tags.special(tags.labelName),  // CodeInfo
+		fontFamily: 'Roboto Mono, monospace',
+		color: color.strikethroughGray,
 	},
 	{
 		tag: tags.emphasis,
@@ -187,12 +204,57 @@ export const bearHighlightStyle = HighlightStyle.define([
 		color: color.strikethroughGray
 	},
 	{
-		tag: t.processingInstruction,
+		tag: t.processingInstruction,  // LinkMark EmphasisMark CodeMark
 		color: color.linkBracketGray
 	},
 	{
-		tag: [tags.url, tags.special(tags.processingInstruction)],
+		tag: [
+			tags.url,
+			tags.special(tags.processingInstruction) // ListMark, QuoteMark, HardBreak
+		],
 		color: color.red
+	},
+	{
+		tag: tags.special(tags.monospace), // CodeText (multi-line code block without CodeInfo)
+		fontFamily: 'Roboto Mono, monospace',
+		color: color.strikethroughGray
+	},
+	//
+	// Code style tags
+	//
+	// We use this theme: https://github.com/vadimdemedes/thememirror/blob/main/source/themes/espresso.ts,
+	// because it matches Bear UI theme very well
+	{
+		tag: t.comment,
+		color: '#AAAAAA',
+		fontFamily: 'Roboto Mono, monospace'
+	},
+	{
+		tag: [t.keyword, t.operator, t.typeName, t.tagName, t.propertyName],
+		color: '#2F6F9F',
+		fontWeight: 'bold',
+		fontFamily: 'Roboto Mono, monospace'
+	},
+	{
+		tag: [t.attributeName, t.definition(t.propertyName)],
+		color: '#4F9FD0',
+		fontFamily: 'Roboto Mono, monospace'
+	},
+	{
+		tag: [t.className, t.string, t.special(t.brace)],
+		color: '#CF4F5F',
+		fontFamily: 'Roboto Mono, monospace'
+	},
+	{
+		tag: t.number,
+		color: '#CF4F5F',
+		fontWeight: 'bold',
+		fontFamily: 'Roboto Mono, monospace'
+	},
+	{
+		tag: t.variableName,
+		fontWeight: 'bold',
+		fontFamily: 'Roboto Mono, monospace'
 	},
 ]);
 
