@@ -130,35 +130,43 @@ export const bearHighlightStyle = HighlightStyle.define([
 		tag: tags.heading1,
 		fontFamily: 'BearSansUIHeadline',
 		color: color.headingGray,
+		fontSize: '32px',
 		fontWeight: 'normal',
-		fontSize: '32px'
 	},
 	{
 		tag: tags.heading2,
 		fontFamily: 'BearSansUIHeadline',
 		color: color.headingGray,
+		fontSize: '26px',
 		fontWeight: 'normal',
-		fontSize: '24px'
 	},
 	{
 		tag: tags.heading3,
+		fontFamily: 'BearSansUIHeadline',
+		color: color.headingGray,
+		fontSize: '20px',
 		fontWeight: 'normal',
-		fontSize: '18px'
 	},
 	{
 		tag: tags.heading4,
+		fontFamily: 'BearSansUIHeadline',
+		color: color.headingGray,
+		fontSize: '18px',
 		fontWeight: 'normal',
-		fontSize: '18px'
 	},
 	{
 		tag: tags.heading5,
+		fontFamily: 'BearSansUIHeadline',
+		color: color.headingGray,
+		fontSize: '18px',
 		fontWeight: 'normal',
-		fontSize: '18px'
 	},
 	{
 		tag: tags.heading6,
+		fontFamily: 'BearSansUIHeadline',
+		color: color.headingGray,
+		fontSize: '18px',
 		fontWeight: 'normal',
-		fontSize: '18px'
 	},
 	{
 		tag: tags.monospace,
@@ -179,13 +187,13 @@ export const bearHighlightStyle = HighlightStyle.define([
 		color: color.strikethroughGray
 	},
 	{
-		tag: [t.processingInstruction],
+		tag: t.processingInstruction,
 		color: color.linkBracketGray
 	},
 	{
-		tag: [tags.url],
+		tag: [tags.url, tags.special(tags.processingInstruction)],
 		color: color.red
-	}
+	},
 ]);
 
 export const bear: Extension = [bearTheme(), syntaxHighlighting(bearHighlightStyle)];

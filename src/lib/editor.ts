@@ -3,13 +3,25 @@ import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
 import { type KeyBinding, keymap } from '@codemirror/view';
-import { Strikethrough } from '@lezer/markdown';
+import {type MarkdownConfig, Strikethrough} from '@lezer/markdown';
+import {styleTags, tags} from '@lezer/highlight';
+
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
 import { EditorSelection } from '@codemirror/state';
 import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { bear } from './bear-theme.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
+
+
+export const ExtendedStyles: MarkdownConfig = {
+	props: [
+		styleTags({
+			"HeaderMark": tags.heading,
+			"ListMark": tags.special(tags.processingInstruction),
+		})
+	]
+}
 
 const startAutocompleteKeymap: KeyBinding[] = [
 	{ key: 'Ctrl-Space', run: startCompletion, shift: () => false }
@@ -50,7 +62,7 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 			basicSetup,
 			bear,
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
-			markdown({ codeLanguages: languages, extensions: [Strikethrough] }),
+			markdown({ codeLanguages: languages, extensions: [Strikethrough, ExtendedStyles] }),
 			autocompletion({
 				activateOnTyping: true,
 				override: [(context) => mdAutocomplete.autocomplete(context)]
