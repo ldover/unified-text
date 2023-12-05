@@ -41,12 +41,28 @@ interface EditorOptions {
 	};
 }
 
+function isFontAvailable(fontName: string) {
+	const fonts = [...window.document.fonts.keys()];
+	console.log({ fonts });
+	for (const { family } of fonts) {
+		if (fontName === family) return true;
+	}
+
+	return false;
+}
+
 export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 	const mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
 
 	let view: EditorView;
 
 	let theme = options.theme;
+
+	options.theme.settings.requiredFonts?.forEach((font) => {
+		if (!isFontAvailable(font)) {
+			throw new Error(`${font} not available`);
+		}
+	});
 
 	function init() {
 		if (view) {

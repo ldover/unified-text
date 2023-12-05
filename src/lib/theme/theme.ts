@@ -57,7 +57,7 @@ export type MarkdownType = 'Document' |
 const toTag = (node: MarkdownType) : Tag => {
 	const map = {
 		Blockquote: t.quote,
-			BlockQuote: t.quote, // todo: check if there's an error in the lib ± there are two block quote definitions
+		BlockQuote: t.quote, // there appear to be 2 blockquote tags in lezer/markdown's (markdown.ts)
 		HorizontalRule: t.contentSeparator,
 		ATXHeading1: t.heading1,
 		ATXHeading2: t.heading2,
@@ -203,11 +203,8 @@ export interface MarkdownSettings {
 	urlWidget?: StyleSpec;
 }
 
+
 const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Extension => {
-	const defaultFonts = ['Roboto', 'Roboto Mono'];
-
-	// todo: add a check for the presence of fonts in FontSet
-
 	const defaults = {
 		defaultFont: 'Roboto',
 		defaultFontSize: '18px',
