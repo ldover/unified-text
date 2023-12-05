@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Editor, UnifiedText } from '../lib';
-	import { bear } from '../lib/theme/bear-theme';
-	import { oceanBlue } from '../lib/theme/ocean-blue';
+	import { bear, oceanBlue } from '../lib/theme';
 
 	let editor: UnifiedText;
 
@@ -76,20 +75,18 @@ As text
 </script>
 
 <div class="page">
-<!--	<div class="controls">-->
-<!--		<div>-->
-<!--			Font size:-->
-<!--			<button on:click={() => editor.increaseFontSize()}>+</button>-->
-<!--			<button on:click={() => editor.decreaseFontSize()}>-</button>-->
-<!--		</div>-->
-<!--	</div>-->
-
+	<!--	<div class="controls">-->
+	<!--		<div>-->
+	<!--			Font size:-->
+	<!--			<button on:click={() => editor.increaseFontSize()}>+</button>-->
+	<!--			<button on:click={() => editor.decreaseFontSize()}>-</button>-->
+	<!--		</div>-->
+	<!--	</div>-->
 
 	<div class="editor-container">
 		<Editor on:mount={onEditorMount}></Editor>
 	</div>
-	<div class="footer-area">
-	</div>
+	<div class="footer-area"></div>
 </div>
 
 <style>
