@@ -77,8 +77,8 @@ const toTag = (node: MarkdownType) : Tag => {
 		URL: t.url,
 		InlineCode: t.monospace,
 		EmphasisMark: t.processingInstruction,
-		CodeMark: t.processingInstruction,
-		LinkMark: t.processingInstruction,
+		CodeMark: t.special(t.atom),
+		LinkMark: t.special(t.link),
 		LinkLabel: t.labelName,
 		LinkTitle: t.string,
 		Paragraph: t.content,
@@ -221,6 +221,7 @@ const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Exte
 		}
 	};
 
+
 	const opts = Object.assign({}, defaults, settings || {});
 
 	const theme = EditorView.theme(
@@ -273,8 +274,9 @@ const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Exte
 			'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
 				{ backgroundColor: opts.selection },
 			'.cm-tooltip': {
+				// todo: border doesn't show in dark mode
+				//   - box shadow might need customization for dark mode
 				borderColor: opts.tooltipBorder,
-				// todo: box shadow might need customization for dark mode
 				boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.1)',
 				borderRadius: '10px',
 				padding: '8px',

@@ -47,6 +47,7 @@ As text
 	function onEditorMount(e) {
 		editor = UnifiedText(e.detail, {
 			theme: oceanBlue,
+			// theme: bear,
 			content,
 			completions: [
 				{ node: 'image', name: 'favicon.png', title: 'favicon.png', path: '/favicon.png' },

@@ -1,44 +1,40 @@
 import type { MarkdownNodeStyle, MarkdownSettings, ThemeOptions } from './theme.js';
 import { espresso } from './code-style.js';
 
-const headingGray = '#5167AA',
-	fontGray = '#A8AFBE',
+const blue = '#5167AA',
+	metallic = '#A8AFBE',
+	gold = '#FFC66D',
 	linkBracketGray = '#297BDE',
-	// Note: background should be transparent so other styles like selection remain visible
-	codeBlockGrayBackground = 'rgba(240, 240, 240, 0.5)',
-	code = '#74AA5F',
+	green = '#74AA5F',
 	orange = '#CC844F',
-	selectionBackground = '#28509E',
-	tooltipSelectionBackground = '#ECECED',
-	tooltipBorder = '#BEBEBE',
-	background = '#161C2D',
-	strikethroughGray = '#878888';
+	sky = '#28509E',
+	deepBlue = '#161C2D'
 
 /// The colors used in the theme, as CSS color strings.
 export const color = {
-	headingGray,
-	fontGray,
+	blue,
+	metallic,
 	orange,
-	code,
+	gold,
+	green,
 	linkBracketGray,
-	codeBlockGrayBackground,
-	selectionBackground,
-	background,
-	tooltipSelectionBackground,
-	strikethroughGray
+	sky,
+	deepBlue,
 };
 
 const settings: MarkdownSettings = {
-	background: color.background,
-	foreground: color.fontGray,
-	selection: color.selectionBackground,
-	caret: color.red,
-
+	background: color.deepBlue,
+	foreground: color.metallic,
+	selection: color.sky,
+	caret: color.orange,
+	urlWidget: {
+		color: color.metallic
+	},
 	requiredFonts: ['BearSansUI', 'BearSansUIHeadline', 'Roboto Mono'],
 	defaultFont: 'BearSansUI',
 	defaultFontSize: '18px',
-	tooltipBorder: tooltipBorder,
-	tooltipSelectionBackground: tooltipSelectionBackground
+	tooltipBorder: color.orange,
+	tooltipSelectionBackground: color.sky
 };
 
 const styles: MarkdownNodeStyle[] = [
@@ -48,57 +44,61 @@ const styles: MarkdownNodeStyle[] = [
 	{
 		node: 'Link',
 		textDecoration: 'none',
-		color: color.red
+		color: color.gold
+	},
+	{
+		node: ['LinkMark'],
+		color: color.metallic,
 	},
 	{
 		node: 'ATXHeading1',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '32px',
 		fontWeight: 'normal'
 	},
 	{
 		node: 'ATXHeading2',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '26px',
 		fontWeight: 'normal'
 	},
 	{
 		node: 'ATXHeading3',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '20px',
 		fontWeight: 'normal'
 	},
 	{
 		node: 'ATXHeading4',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '18px',
 		fontWeight: 'normal'
 	},
 	{
 		node: 'ATXHeading5',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '18px',
 		fontWeight: 'normal'
 	},
 	{
 		node: 'ATXHeading6',
 		fontFamily: 'BearSansUIHeadline',
-		color: color.headingGray,
+		color: color.blue,
 		fontSize: '18px',
 		fontWeight: 'normal'
 	},
 	{
-		node: 'InlineCode',
+		node: ['InlineCode', 'CodeText'],
 		fontFamily: 'Roboto Mono, monospace',
-		color: color.code
+		color: color.green
 	},
 	{
-		node: ['CodeInfo', 'CodeText'],
+		node: ['CodeInfo'],
 		fontFamily: 'Roboto Mono, monospace',
 		color: color.orange
 	},
@@ -113,14 +113,13 @@ const styles: MarkdownNodeStyle[] = [
 	{
 		node: 'Strikethrough',
 		textDecoration: 'line-through',
-		color: color.strikethroughGray
 	},
 	{
-		node: ['EmphasisMark', 'LinkMark', 'CodeMark'],
-		color: color.linkBracketGray
+		node: ['URL'],
+		color: color.gold
 	},
 	{
-		node: ['URL', 'ListMark', 'QuoteMark', 'HardBreak', 'TaskMarker'],
+		node: ['ListMark', 'QuoteMark', 'HardBreak', 'TaskMarker', 'CodeMark', 'EmphasisMark'],
 		color: color.orange
 	}
 ];

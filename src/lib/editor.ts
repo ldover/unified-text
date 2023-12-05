@@ -4,7 +4,7 @@ import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
 import { type KeyBinding, keymap } from '@codemirror/view';
 import {type MarkdownConfig, Strikethrough, TaskList} from '@lezer/markdown';
-import {styleTags, tags} from '@lezer/highlight';
+import {styleTags, tags as t} from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
 import { EditorSelection } from '@codemirror/state';
@@ -18,10 +18,12 @@ import createTheme from "./theme/theme.js";
 export const ExtendedStyles: MarkdownConfig = {
 	props: [
 		styleTags({
-			"HeaderMark": tags.heading,
-			"ListMark QuoteMark HardBreak": tags.special(tags.processingInstruction),
-			"CodeText": tags.special(tags.monospace),
-			"CodeInfo": tags.special(tags.labelName),
+			HeaderMark: t.heading,
+			"ListMark QuoteMark HardBreak": t.special(t.processingInstruction),
+			CodeText: t.special(t.monospace),
+			CodeInfo: t.special(t.labelName),
+			CodeMark: t.special(t.atom),
+			LinkMark: t.special(t.link),
 		})
 	]
 }
