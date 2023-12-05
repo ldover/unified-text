@@ -1,5 +1,7 @@
 <script>
 	import { Editor, UnifiedText } from '../lib';
+	import { bear } from '../lib/theme/bear-theme';
+	import { oceanBlue } from '../lib/theme/ocean-blue';
 
 	let editor;
 
@@ -44,6 +46,7 @@ As text
 
 	function onEditorMount(e) {
 		editor = UnifiedText(e.detail, {
+			theme: oceanBlue,
 			content,
 			completions: [
 				{ node: 'image', name: 'favicon.png', title: 'favicon.png', path: '/favicon.png' },
@@ -72,30 +75,38 @@ As text
 </script>
 
 <div class="page">
-	<div class="controls">
-		<div>
-			Font size:
-			<button on:click={editor.increaseFontSize()}>+</button>
-			<button on:click={editor.decreaseFontSize()}>-</button>
-		</div>
-	</div>
+<!--	<div class="controls">-->
+<!--		<div>-->
+<!--			Font size:-->
+<!--			<button on:click={() => editor.increaseFontSize()}>+</button>-->
+<!--			<button on:click={() => editor.decreaseFontSize()}>-</button>-->
+<!--		</div>-->
+<!--	</div>-->
+
 
 	<div class="editor-container">
 		<Editor on:mount={onEditorMount}></Editor>
+	</div>
+	<div class="footer-area">
 	</div>
 </div>
 
 <style>
 	.editor-container {
-		width: 800px;
-		height: 700px;
-		max-height: 700px;
+		width: 100%;
+		height: 100%;
+		/*max-height: 700px;*/
 		border: 1px solid black;
+	}
+
+	.footer-area {
+		height: 0%;
 	}
 
 	.page {
 		overflow-y: hidden;
-		display: flex;
+		/*display: flex;*/
+
 		height: 100vh;
 	}
 

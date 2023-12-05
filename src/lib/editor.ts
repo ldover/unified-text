@@ -9,9 +9,10 @@ import {styleTags, tags} from '@lezer/highlight';
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
 import { EditorSelection } from '@codemirror/state';
 import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
-import { bear } from './bear-theme.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
+import type {ThemeOptions} from "./theme/theme.js";
+import createTheme from "./theme/theme.js";
 
 
 export const ExtendedStyles: MarkdownConfig = {
@@ -29,15 +30,11 @@ const startAutocompleteKeymap: KeyBinding[] = [
 	{ key: 'Ctrl-Space', run: startCompletion, shift: () => false }
 ];
 
-interface EditorStyle {
-	fontSize: number;
-	fontFamily: string;
-}
 
 interface EditorOptions {
 	content?: string;
 	completions?: MarkdownCompletion[];
-	style?: EditorStyle;
+	theme: ThemeOptions;
 	callbacks?: {
 		onChange?: (doc: string) => void;
 		onLinkClick?: (url: string) => void;
@@ -60,9 +57,12 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 			options.callbacks?.onChange && options.callbacks.onChange(view.state.toJSON().doc);
 		});
 
+
+		const theme = createTheme(options.theme)
+
 		const extensions = [
 			basicSetup,
-			bear,
+			theme,
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({

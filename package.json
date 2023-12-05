@@ -40,7 +40,8 @@
 		"@lezer/highlight": "^1.1.6",
 		"@lezer/javascript": "^1.0.0",
 		"@lezer/markdown": "^1.0.0",
-		"codemirror": "^6.0.0"
+		"codemirror": "^6.0.0",
+		"style-mod": "^4.1.0"
 	},
 	"peerDependencies": {
 		"svelte": "^4.0.0"
