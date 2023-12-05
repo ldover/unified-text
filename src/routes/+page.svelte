@@ -1,9 +1,9 @@
-<script>
+<script lang="ts">
 	import { Editor, UnifiedText } from '../lib';
 	import { bear } from '../lib/theme/bear-theme';
 	import { oceanBlue } from '../lib/theme/ocean-blue';
 
-	let editor;
+	let editor: UnifiedText;
 
 	const content = `# Sample heading
 Trying out [Links](somelink.md) and **bold** and *italic* and ~~strikethrough~~  lists:

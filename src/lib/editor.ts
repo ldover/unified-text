@@ -3,35 +3,33 @@ import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
 import { type KeyBinding, keymap } from '@codemirror/view';
-import {type MarkdownConfig, Strikethrough, TaskList} from '@lezer/markdown';
-import {styleTags, tags as t} from '@lezer/highlight';
+import { type MarkdownConfig, Strikethrough, TaskList } from '@lezer/markdown';
+import { styleTags, tags as t } from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
 import { EditorSelection } from '@codemirror/state';
 import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
-import type {ThemeOptions} from "./theme/theme.js";
-import createTheme from "./theme/theme.js";
-
+import type { ThemeOptions } from './theme/theme.js';
+import createTheme from './theme/theme.js';
 
 export const ExtendedStyles: MarkdownConfig = {
 	props: [
 		styleTags({
 			HeaderMark: t.heading,
-			"ListMark QuoteMark HardBreak": t.special(t.processingInstruction),
+			'ListMark QuoteMark HardBreak': t.special(t.processingInstruction),
 			CodeText: t.special(t.monospace),
 			CodeInfo: t.special(t.labelName),
 			CodeMark: t.special(t.atom),
-			LinkMark: t.special(t.link),
+			LinkMark: t.special(t.link)
 		})
 	]
-}
+};
 
 const startAutocompleteKeymap: KeyBinding[] = [
 	{ key: 'Ctrl-Space', run: startCompletion, shift: () => false }
 ];
-
 
 interface EditorOptions {
 	content?: string;
@@ -48,7 +46,7 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 
 	let view: EditorView;
 
-	let fontSize = 19;
+	let theme = options.theme;
 
 	function init() {
 		if (view) {
@@ -59,12 +57,9 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 			options.callbacks?.onChange && options.callbacks.onChange(view.state.toJSON().doc);
 		});
 
-
-		const theme = createTheme(options.theme)
-
 		const extensions = [
 			basicSetup,
-			theme,
+			createTheme(theme),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({
@@ -145,31 +140,9 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		setCompletions: function (completions: MarkdownCompletion[]) {
 			mdAutocomplete.setCompletions(completions);
 		},
-		setTheme: function () {
-			throw new Error('not implemented');
-		},
-		getTheme: function () {
-			throw new Error('not implemented');
-		},
-		increaseFontSize: function (): boolean {
-			if (fontSize >= 64) {
-				return false;
-			}
-
-			fontSize += 1;
-
+		setTheme: function (newTheme: ThemeOptions) {
+			theme = newTheme;
 			init();
-			return true;
-		},
-		decreaseFontSize: function (): boolean {
-			if (fontSize <= 4) {
-				return false;
-			}
-
-			fontSize -= 1;
-
-			init();
-			return true;
 		}
 	};
 }
