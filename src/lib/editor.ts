@@ -43,7 +43,6 @@ interface EditorOptions {
 
 function isFontAvailable(fontName: string) {
 	const fonts = [...window.document.fonts.keys()];
-	console.log({ fonts });
 	for (const { family } of fonts) {
 		if (fontName === family) return true;
 	}

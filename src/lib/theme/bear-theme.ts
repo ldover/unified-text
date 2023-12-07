@@ -32,7 +32,7 @@ const settings: MarkdownSettings = {
 	selection: color.selectionBackground,
 	caret: color.red,
 
-	width: '700px',
+	width: '900px',
 
 	requiredFonts: ['BearSansUI', 'BearSansUIHeadline', 'Roboto Mono'],
 	defaultFont: 'BearSansUI',

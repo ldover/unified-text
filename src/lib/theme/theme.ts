@@ -209,7 +209,7 @@ const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Exte
 		defaultFont: 'Roboto',
 		defaultFontSize: '18px',
 		lineHeight: '170%',
-		width: '700px',
+		width: '900px',
 		imgWidget: {
 			maxHeight: '300px'
 		},
