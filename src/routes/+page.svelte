@@ -75,13 +75,12 @@ As text
 </script>
 
 <div class="page">
-	<!--	<div class="controls">-->
-	<!--		<div>-->
-	<!--			Font size:-->
-	<!--			<button on:click={() => editor.increaseFontSize()}>+</button>-->
-	<!--			<button on:click={() => editor.decreaseFontSize()}>-</button>-->
-	<!--		</div>-->
-	<!--	</div>-->
+	<div class="controls">
+		<div>
+			Focus
+			<button on:click={() => editor.focus()}>Focus</button>
+		</div>
+	</div>
 
 	<div class="editor-container">
 		<Editor on:mount={onEditorMount}></Editor>

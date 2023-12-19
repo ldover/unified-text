@@ -158,6 +158,9 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		setTheme: function (newTheme: ThemeOptions) {
 			theme = newTheme;
 			init();
+		},
+		focus: function () {
+			view.focus();
 		}
 	};
 }
