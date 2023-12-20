@@ -32,6 +32,7 @@ const startAutocompleteKeymap: KeyBinding[] = [
 ];
 
 interface EditorOptions {
+	e?: HTMLElement,
 	content?: string;
 	completions?: MarkdownCompletion[];
 	theme: ThemeOptions;
@@ -42,6 +43,7 @@ interface EditorOptions {
 }
 
 function isFontAvailable(fontName: string) {
+	// todo: window could be undefined if this function is called before Svelte's onMount
 	const fonts = [...window.document.fonts.keys()];
 	for (const { family } of fonts) {
 		if (fontName === family) return true;
@@ -50,12 +52,13 @@ function isFontAvailable(fontName: string) {
 	return false;
 }
 
-export function UnifiedText(e: HTMLElement, options: EditorOptions) {
+export function UnifiedText(options: EditorOptions) {
 	const mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
 
 	let view: EditorView;
 
 	let theme = options.theme;
+	let e = options.e || null;
 
 	options.theme.settings.requiredFonts?.forEach((font) => {
 		if (!isFontAvailable(font)) {
@@ -64,6 +67,10 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 	});
 
 	function init() {
+		if (!e) {
+			throw new Error('HTML Element is missing.')
+		}
+
 		if (view) {
 			view.destroy();
 		}
@@ -112,7 +119,8 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		});
 	}
 
-	init();
+	// If element was passed
+	e && init();
 
 	return {
 		getContent: function (): string {
@@ -161,6 +169,10 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		},
 		focus: function () {
 			view.focus();
+		},
+		setElement: function (element: HTMLElement) {
+			e = element;
+			init();
 		}
 	};
 }

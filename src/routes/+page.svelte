@@ -2,8 +2,6 @@
 	import { Editor, UnifiedText } from '../lib';
 	import { bear, oceanBlue } from '../lib/theme';
 
-	let editor: UnifiedText;
-
 	const content = `# Sample heading
 Trying out [Links](somelink.md) and **bold** and *italic* and ~~strikethrough~~  lists:
 1. List item 1
@@ -43,8 +41,11 @@ As text
 ##### heading 5
 ###### heading 6`;
 
+
+	let editor;
+
 	function onEditorMount(e) {
-		editor = UnifiedText(e.detail, {
+		editor = UnifiedText({
 			// theme: oceanBlue,
 			theme: bear,
 			content,
@@ -70,7 +71,9 @@ As text
 			callbacks: {
 				onLinkClick: (url) => console.log(url)
 			}
-		});
+		})
+
+		editor.setElement(e.detail)
 	}
 </script>
 
