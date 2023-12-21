@@ -7,7 +7,7 @@ import { type MarkdownConfig, Strikethrough, TaskList } from '@lezer/markdown';
 import { styleTags, tags as t } from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
-import { EditorSelection } from '@codemirror/state';
+import {EditorSelection} from '@codemirror/state';
 import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
@@ -56,6 +56,7 @@ export function UnifiedText(options: EditorOptions) {
 	const mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
 
 	let view: EditorView;
+	let edit = true;
 
 	let theme = options.theme;
 	let e = options.e || null;
@@ -81,6 +82,7 @@ export function UnifiedText(options: EditorOptions) {
 
 		const extensions = [
 			basicSetup,
+			EditorView.editable.of(edit),
 			createTheme(theme),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
@@ -173,6 +175,10 @@ export function UnifiedText(options: EditorOptions) {
 		setElement: function (element: HTMLElement) {
 			e = element;
 			init();
+		},
+		setEditable: function (isEdit: boolean) {
+			edit = isEdit
+			init() // todo: use comportment to update extension: https://discuss.codemirror.net/t/switch-between-editor-being-editable-or-not/2745/5
 		}
 	};
 }

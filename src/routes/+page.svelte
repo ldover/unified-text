@@ -83,6 +83,10 @@ As text
 			Focus
 			<button on:click={() => editor.focus()}>Focus</button>
 		</div>
+		<div>
+			Editable
+			<button on:click={() => editor.setEditable(false)}>set read only</button>
+		</div>
 	</div>
 
 	<div class="editor-container">
