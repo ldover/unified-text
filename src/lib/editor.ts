@@ -87,6 +87,7 @@ export function UnifiedText(options: EditorOptions) {
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({
+				closeOnBlur: false,
 				activateOnTyping: true,
 				override: [(context) => mdAutocomplete.autocomplete(context)]
 			}),
@@ -164,6 +165,11 @@ export function UnifiedText(options: EditorOptions) {
 		},
 		setCompletions: function (completions: MarkdownCompletion[]) {
 			mdAutocomplete.setCompletions(completions);
+
+			// If tooltip visible recompute the completions
+			if (document.querySelector('.cm-tooltip-autocomplete')) {
+				startCompletion(view)  // Refresh completions
+			}
 		},
 		setTheme: function (newTheme: ThemeOptions) {
 			theme = newTheme;
