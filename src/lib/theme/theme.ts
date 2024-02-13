@@ -225,7 +225,6 @@ const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Exte
 		{
 			'&': {
 				width: '100%',
-				paddingTop: '16px',
 				height: '100%',
 				color: '#1f1f1f',
 				backgroundColor: opts.background
@@ -236,7 +235,8 @@ const createTheme = ({ dark, settings, styles, codeStyles }: ThemeOptions): Exte
 			'.cm-img': opts.imgWidget,
 			'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
 			'.cm-scroller': {
-				paddingTop: '24px',
+				paddingTop: '40px',
+				paddingBottom: '50%', // Add bottom padding so user can scroll past the editor content
 				width: '100%',
 				justifyContent: 'center'
 			},
