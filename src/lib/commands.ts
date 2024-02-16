@@ -4,21 +4,37 @@ import { EditorSelection } from '@codemirror/state';
 const formatMarkdown = (sign: string): StateCommand => {
 	return ({ state, dispatch }) => {
 		const { from, to } = state.selection.main;
-		let text = state.doc.sliceString(from, to);
-		const isFormatted = text.startsWith(sign) && text.endsWith(sign);
-		// todo: look around to see if selection is formatted: **|bolded text|**
+		let selected = state.doc.sliceString(from, to);
+		// Look around the selection to selected text is formatted: **|bolded text|**
+		const selectedOut = state.doc.sliceString(from - sign.length, to + sign.length);
 
-		if (isFormatted) {
-			text = text.substring(sign.length, text.length - sign.length); // remove formatting
+		function isFormatted(text: string) {
+			return text.startsWith(sign) && text.endsWith(sign);
+		}
+
+		const isInnerFormatted = isFormatted(selected);
+		const isOuterFormatted = isFormatted(selectedOut);
+
+		let selection;
+		let insertFrom = from;
+		let insertTo = to;
+		if (isInnerFormatted) {
+			// if |**bold**|, then new selection will be same on the left and -4 on the right
+			selection = { from: from, to: to - sign.length * 2 };
+			selected = selected.substring(sign.length, selected.length - sign.length); // remove formatting
+		} else if (isOuterFormatted) {
+			// if **|bold|**, then new selection will be -2 for left and -2 for right
+			selection = { from: from - sign.length, to: to - sign.length };
+			insertFrom -= sign.length;
+			insertTo += sign.length;
 		} else {
-			text = `${sign}${text}${sign}`;  // Apply formatting
+			selection = { from: from + sign.length, to: to + sign.length };
+			selected = `${sign}${selected}${sign}`; // Apply formatting
 		}
 
 		const tr = state.update({
-			changes: { from, to, insert: text },
-			selection: EditorSelection.create([
-				EditorSelection.range(from + sign.length, to + sign.length)
-			])
+			changes: { from: insertFrom, to: insertTo, insert: selected },
+			selection: EditorSelection.create([EditorSelection.range(selection.from, selection.to)])
 		});
 
 		dispatch(tr);
