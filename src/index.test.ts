@@ -34,17 +34,23 @@ function mkState(doc: string, extension?: Extension) {
 
 function stateStr(state: EditorState) {
 	let doc = state.doc.toString();
-	if (state.selection.ranges.length != 1) {
-		throw new Error('Expecting a single selection');
+	// Check if there's only one range and if it's a cursor (from == to)
+	if (state.selection.ranges.length === 1 && state.selection.main.empty) {
+		// Handle a single cursor position
+		const cursorPos = state.selection.main.from;
+		doc = doc.slice(0, cursorPos) + '|' + doc.slice(cursorPos);
+	} else if (state.selection.ranges.length === 1) {
+		// Handle a single selection range
+		const { from, to } = state.selection.main;
+		doc = doc.slice(0, from) + '|' + doc.slice(from, to) + '|' + doc.slice(to);
+	} else {
+		// More complex cases with multiple selections can be added here if needed
+		throw new Error('This utility currently supports single selections or cursors only.');
 	}
-
-	// todo: handle single cursor here
-	[state.selection.ranges[0].from, state.selection.ranges[0].to].forEach((i, j) => {
-		doc = doc.slice(0, i + j) + '|' + doc.slice(i + j);
-	});
 
 	return doc;
 }
+
 
 function cmd(state: EditorState, command: StateCommand) {
 	command({
@@ -74,14 +80,24 @@ describe('bold', () => {
 	it('removes formatting when formatting is applied outside selection 2', () =>
 		test('**|bolded|**', '|bolded|'));
 
-	// todo: edge cases
-	// creates formatting on single selection test('|' '**|**'));
-	// removes formatting when empty formatting test('**|**', '|'));
-	// does nothing when inside bolded text test('**bolded|**', '**bolded|**'));
+	it('creates formatting on single selection', () => {
+		// Test applying bold formatting when there's only a cursor (no selection)
+		test('|', '**|**');
+	});
 
-	// it('strips whitespace before formatting', () =>
-	// 	test('some| bolded |text', 'some **|bolded|** text'));
-	//
-	// it('handles overlapping formatting', () =>
-	// 	test('some |bol**ded**| text', 'some **|bolded|** text'));
+	it('removes formatting when empty formatting', () => {
+		// Test removing bold formatting when the selection is within an empty bold syntax
+		test('**|**', '|');
+	});
+
+	it('does nothing when inside bolded text', () => {
+		// Test that no additional formatting is applied when the cursor is inside an already bolded text
+		test('**bolded|**', '**bolded|**');
+	});
+
+	it('strips whitespace before formatting', () =>
+		test('some| bolded |text', 'some **|bolded|** text'));
+
+	it('handles overlapping formatting', () =>
+		test('some |bol**ded**| text', 'some **|bolded|** text'));
 });
