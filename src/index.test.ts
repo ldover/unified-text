@@ -34,11 +34,15 @@ function mkState(doc: string, extension?: Extension) {
 
 function stateStr(state: EditorState) {
 	let doc = state.doc.toString();
-	for (let i = state.selection.ranges.length - 1; i >= 0; i--) {
-		let range = state.selection.ranges[i];
-		doc = doc.slice(0, range.from) + '|' + doc.slice(range.to);
+	if  (state.selection.ranges.length != 1) {
+		throw new Error('Expecting a single selection')
 	}
-	return doc;
+
+	[state.selection.ranges[0].from, state.selection.ranges[0].to].forEach((i, j) => {
+		doc = doc.slice(0, i + j) + '|' + doc.slice(i + j)
+	})
+
+	return doc
 }
 
 function cmd(state: EditorState, command: StateCommand) {
@@ -53,17 +57,20 @@ function cmd(state: EditorState, command: StateCommand) {
 
 describe('bold', () => {
 	function test(from: string, to: string, ext?: Extension) {
-		expect(stateStr(cmd(mkState(from, ext), bold))).toBe(to);
+		let state = mkState(from, ext);
+		let out = stateStr(cmd(state, bold));
+		expect(out).toBe(to);
 	}
 
-	it('applies formatting', () => test('some |bolded| text', 'some **bolded**| text'));
+	it('applies formatting', () => test('some |bolded| text', 'some **|bolded|** text'));
+
+	it('removes formatting when selection is already formatted', () =>
+		test('some **|bolded|** text', 'some |bolded| text'));
 
 	it('strips whitespace before formatting', () =>
-		test('some| bolded |text', 'some **bolded**| text'));
+		test('some| bolded |text', 'some **|bolded|** text'));
 
-	it('only sets cursor position when already formatted', () =>
-		test('some |**bolded**| text', 'some **bolded**| text'));
 
 	it('handles overlapping formatting', () =>
-		test('some |bol**ded**| text', 'some **bolded**| text'));
+		test('some |bol**ded**| text', 'some **|bolded|** text'));
 });

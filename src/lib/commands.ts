@@ -3,15 +3,22 @@ import { EditorSelection } from '@codemirror/state';
 
 const formatMarkdown = (sign: string): StateCommand => {
 	return ({ state, dispatch }) => {
-		const p0 = state.selection.main.from;
-		const p1 = state.selection.main.to;
+		const { from, to } = state.selection.main;
+		let text = state.doc.sliceString(from, to);
+		const isFormatted = text.startsWith(sign) && text.endsWith(sign);
+		// todo: look around to see if selection is formatted: **|bolded text|**
+
+		if (isFormatted) {
+			text = text.substring(sign.length, text.length - sign.length); // remove formatting
+		} else {
+			text = `${sign}${text}${sign}`;  // Apply formatting
+		}
 
 		const tr = state.update({
-			changes: [
-				{ from: p0, insert: sign },
-				{ from: p1, insert: sign }
-			],
-			selection: EditorSelection.cursor(p1 + sign.length * 2)
+			changes: { from, to, insert: text },
+			selection: EditorSelection.create([
+				EditorSelection.range(from + sign.length, to + sign.length)
+			])
 		});
 
 		dispatch(tr);
