@@ -1,5 +1,5 @@
 import { syntaxTree } from '@codemirror/language';
-import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
+import type { CompletionContext, CompletionResult  } from '@codemirror/autocomplete';
 import type { EditorView } from 'codemirror';
 
 export interface MarkdownCompletion {
@@ -7,6 +7,9 @@ export interface MarkdownCompletion {
 	name: string; // name to match
 	title: string; // title to use in the link or image
 	path: string;
+	type: 'note' | 'log' | 'image'
+	boost?: number
+	detail?: string
 }
 
 export function completeImageLinks(
@@ -26,6 +29,8 @@ export function completeImageLinks(
 	) =>
 		completions.map((completion) => ({
 			label: completion.name,
+			boost: completion.boost,
+			detail: completion.detail,
 			apply: (view: EditorView) => {
 				const completedText = format(completion);
 				view.dispatch({
@@ -37,7 +42,7 @@ export function completeImageLinks(
 					selection: { anchor: start + completedText.length }
 				});
 			},
-			type: 'text'
+			type: completion.type
 		}));
 
 	const tree = syntaxTree(context.state);

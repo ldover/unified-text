@@ -7,7 +7,7 @@ import { type MarkdownConfig, Strikethrough, TaskList } from '@lezer/markdown';
 import { styleTags, tags as t } from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
-import {EditorSelection, Prec} from '@codemirror/state';
+import { EditorSelection, Prec } from '@codemirror/state';
 import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
@@ -33,6 +33,7 @@ const startAutocompleteKeymap: KeyBinding[] = [
 ];
 
 interface EditorOptions {
+	e?: HTMLElement,
 	content?: string;
 	completions?: MarkdownCompletion[];
 	theme: ThemeOptions;
@@ -43,6 +44,7 @@ interface EditorOptions {
 }
 
 function isFontAvailable(fontName: string) {
+	// todo: window could be undefined if this function is called before Svelte's onMount
 	const fonts = [...window.document.fonts.keys()];
 	for (const { family } of fonts) {
 		if (fontName === family) return true;
@@ -51,12 +53,14 @@ function isFontAvailable(fontName: string) {
 	return false;
 }
 
-export function UnifiedText(e: HTMLElement, options: EditorOptions) {
+export function UnifiedText(options: EditorOptions) {
 	const mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
 
 	let view: EditorView;
+	let edit = true;
 
 	let theme = options.theme;
+	let e = options.e || null;
 
 	options.theme.settings.requiredFonts?.forEach((font) => {
 		if (!isFontAvailable(font)) {
@@ -83,6 +87,10 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 	];
 
 	function init() {
+		if (!e) {
+			throw new Error('HTML Element is missing.')
+		}
+
 		if (view) {
 			view.destroy();
 		}
@@ -93,11 +101,13 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 
 		const extensions = [
 			basicSetup,
+			EditorView.editable.of(edit),
 			createTheme(theme),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			Prec.highest(keymap.of(formattingShortcuts)), // Use highest precedence to override default keymap
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({
+				closeOnBlur: false,
 				activateOnTyping: true,
 				override: [(context) => mdAutocomplete.autocomplete(context)]
 			}),
@@ -132,7 +142,8 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		});
 	}
 
-	init();
+	// If element was passed
+	e && init();
 
 	return {
 		getContent: function (): string {
@@ -174,10 +185,26 @@ export function UnifiedText(e: HTMLElement, options: EditorOptions) {
 		},
 		setCompletions: function (completions: MarkdownCompletion[]) {
 			mdAutocomplete.setCompletions(completions);
+
+			// If tooltip visible recompute the completions
+			if (document.querySelector('.cm-tooltip-autocomplete')) {
+				startCompletion(view)  // Refresh completions
+			}
 		},
 		setTheme: function (newTheme: ThemeOptions) {
 			theme = newTheme;
 			init();
+		},
+		focus: function () {
+			view.focus();
+		},
+		setElement: function (element: HTMLElement) {
+			e = element;
+			init();
+		},
+		setEditable: function (isEdit: boolean) {
+			edit = isEdit
+			init() // todo: use comportment to update extension: https://discuss.codemirror.net/t/switch-between-editor-being-editable-or-not/2745/5
 		}
 	};
 }
