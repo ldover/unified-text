@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Editor, UnifiedText } from '../lib';
-	import { bear, oceanBlue, tiger } from '../lib/theme';
+	import { bear, oceanBlue } from '../lib/theme';
 
 	const content = `# Sample heading
 Trying out [Links](somelink.md) and **bold** and *italic* and ~~strikethrough~~  lists:
@@ -62,8 +62,7 @@ As text
 		];
 		editor = UnifiedText({
 			// theme: oceanBlue,
-			// theme: bear,
-			theme: tiger,
+			theme: bear,
 			content,
 			completions: completions,
 			callbacks: {

@@ -7,7 +7,7 @@ export interface MarkdownCompletion {
 	name: string; // name to match
 	title: string; // title to use in the link or image
 	path: string;
-	type: 'note' | 'log' | 'image'
+	type: string // maps to CSS selector `.cm-completionIcon-{type}`
 	boost?: number
 	detail?: string
 }

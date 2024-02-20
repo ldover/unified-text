@@ -135,5 +135,5 @@ export const bear: ThemeOptions = {
 	dark: false,
 	settings,
 	styles,
-	codeStyles: espresso // This theme matches Bear UI well enough
+	codeStyles: espresso, // This theme matches Bear UI well enough
 };

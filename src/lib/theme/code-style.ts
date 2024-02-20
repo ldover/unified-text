@@ -37,36 +37,5 @@ const espresso: TagStyle[] = [
 	}
 ];
 
-const espressoOrange: TagStyle[] = [
-	{
-		tag: t.comment,
-		color: '#AAAAAA',
-		fontFamily: 'Roboto Mono, monospace'
-	},
-	{
-		tag: [t.keyword, t.operator, t.typeName, t.tagName, t.propertyName],
-		color: '#2F6F9F',
-		fontFamily: 'Roboto Mono, monospace'
-	},
-	{
-		tag: [t.attributeName, t.definition(t.propertyName)],
-		color: '#4F9FD0',
-		fontFamily: 'Roboto Mono, monospace'
-	},
-	{
-		tag: [t.className, t.string, t.special(t.brace)],
-		color: '#CF6E4F',
-		fontFamily: 'Roboto Mono, monospace'
-	},
-	{
-		tag: t.number,
-		color: '#CF6E4F',
-		fontFamily: 'Roboto Mono, monospace'
-	},
-	{
-		tag: t.variableName,
-		fontFamily: 'Roboto Mono, monospace'
-	}
-];
 
-export { espresso, espressoOrange };
+export { espresso };
