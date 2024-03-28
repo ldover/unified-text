@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Editor, UnifiedText } from '../lib';
+	import { UnifiedText } from '../lib/editor.js';
+	import Editor from '../lib/Editor.svelte';
 	import { bear, oceanBlue } from '../lib/theme';
 
 	const content = `# Sample heading
@@ -60,16 +61,15 @@ As text
 			{detail: 'inbox', node: 'link', name: 'Knowledge applications', title: 'Knowledge applications', path: 'datastore://value.md'},
 			{detail: 'inbox', node: 'link', name: 'Knowledge stack', title: 'Knowledge stack', path: 'datastore://value.md'}
 		];
-		editor = UnifiedText({
+		editor = new UnifiedText({
 			// theme: oceanBlue,
 			theme: bear,
 			content,
 			completions: completions,
-			callbacks: {
-				onLinkClick: (url) => console.log(url)
-			}
 		})
 
+		editor.on('link-click', (url) => console.log({url}))
+		editor.on('change', (content) => console.log({content}))
 		editor.setElement(e.detail)
 	}
 </script>

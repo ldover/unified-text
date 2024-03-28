@@ -13,7 +13,7 @@ import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
-import {bold, emphasize, strikethrough} from './commands.js';
+import { bold, emphasize, strikethrough } from './commands.js';
 
 export const ExtendedStyles: MarkdownConfig = {
 	props: [
@@ -33,14 +33,10 @@ const startAutocompleteKeymap: KeyBinding[] = [
 ];
 
 interface EditorOptions {
-	e?: HTMLElement,
+	e?: HTMLElement;
 	content?: string;
 	completions?: MarkdownCompletion[];
 	theme: ThemeOptions;
-	callbacks?: {
-		onChange?: (doc: string) => void;
-		onLinkClick?: (url: string) => void;
-	};
 }
 
 function isFontAvailable(fontName: string) {
@@ -53,63 +49,94 @@ function isFontAvailable(fontName: string) {
 	return false;
 }
 
-export function UnifiedText(options: EditorOptions) {
-	const mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
+type Callback = (...args: unknown[]) => void;
 
-	let view: EditorView;
-	let edit = true;
+type EditorEvent = 'change' | 'link-click';
 
-	let theme = options.theme;
-	let e = options.e || null;
+interface Listener {
+	callback: Callback;
+}
 
-	options.theme.settings.requiredFonts?.forEach((font) => {
-		if (!isFontAvailable(font)) {
-			throw new Error(`${font} not available`);
+const formattingShortcuts: KeyBinding[] = [
+	{
+		key: 'Mod-b', // CMD + b
+		preventDefault: true,
+		run: bold
+	},
+	{
+		key: 'Mod-i', // CMD + i
+		preventDefault: true,
+		run: emphasize
+	},
+	{
+		key: 'Mod-shift-s', //
+		preventDefault: true,
+		run: strikethrough
+	}
+];
+
+export class UnifiedText {
+	private view: EditorView | null;
+	private edit: boolean;
+	private theme: ThemeOptions;
+	private e: HTMLElement | null;
+	private mdAutocomplete: unknown; // todo
+
+	private readonly eventListeners: { [event: string]: Listener[] };
+
+	constructor(options: EditorOptions) {
+		this.mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
+
+		this.view = null;
+		this.edit = true;
+
+		this.theme = options.theme;
+		this.e = options.e || null;
+
+		options.theme.settings.requiredFonts?.forEach((font) => {
+			if (!isFontAvailable(font)) {
+				throw new Error(`${font} not available`);
+			}
+		});
+
+		this.eventListeners = {};
+
+		// If element was passed
+		this.e && this.init(options.content || '');
+	}
+
+	// Emit an event, triggering all listeners registered for this event
+	private emit(event: EditorEvent, ...args: unknown[]) {
+		const listeners = this.eventListeners[event];
+		if (listeners) {
+			listeners.forEach((eventListener) => eventListener.callback(...args));
 		}
-	});
+	}
 
-	const formattingShortcuts: KeyBinding[] = [
-		{
-			key: 'Mod-b', // CMD + b
-			preventDefault: true,
-			run: bold
-		},
-		{
-			key: 'Mod-i', // CMD + i
-			preventDefault: true,
-			run: emphasize
-		},
-		{
-			key: 'Mod-shift-s', //
-			preventDefault: true,
-			run: strikethrough
-		}
-	];
-
-	function init() {
-		if (!e) {
-			throw new Error('HTML Element is missing.')
+	private init(doc = '') {
+		if (!this.e) {
+			throw new Error('HTML Element is missing.');
 		}
 
-		if (view) {
-			view.destroy();
+		if (this.view) {
+			this.view.destroy();
 		}
 
-		e.addEventListener('keyup', () => {
-			options.callbacks?.onChange && options.callbacks.onChange(view.state.toJSON().doc);
+		this.e.addEventListener('keyup', () => {
+			this.emit('change', this.view.state.toJSON().doc);
 		});
 
 		const extensions = [
 			basicSetup,
-			EditorView.editable.of(edit),
-			createTheme(theme),
+			EditorView.editable.of(this.edit),
+			createTheme(this.theme),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			Prec.highest(keymap.of(formattingShortcuts)), // Use highest precedence to override default keymap
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
 			autocompletion({
 				closeOnBlur: false,
 				activateOnTyping: true,
-				override: [(context) => mdAutocomplete.autocomplete(context)]
+				override: [(context) => this.mdAutocomplete.autocomplete(context)]
 			}),
 			linkWidget(),
 			imageWidget(),
@@ -125,7 +152,7 @@ export function UnifiedText(options: EditorOptions) {
 					if (node && ['Link', 'URL'].includes(node.type.name)) {
 						const url = extractLink(node, view);
 						if (url) {
-							options.callbacks?.onLinkClick && options.callbacks.onLinkClick(url);
+							this.emit('link-click', url);
 							return true;
 						}
 					}
@@ -135,76 +162,90 @@ export function UnifiedText(options: EditorOptions) {
 			})
 		];
 
-		view = new EditorView({
-			doc: options.content || '',
+		this.view = new EditorView({
+			doc: doc,
 			extensions,
-			parent: e
+			parent: this.e
 		});
 	}
 
-	// If element was passed
-	e && init();
+	getContent(): string {
+		return this.view.state.toJSON().doc;
+	}
 
-	return {
-		getContent: function (): string {
-			return view.state.toJSON().doc;
-		},
-		setContent: function (text: string) {
-			// Create a transaction that replaces the entire content
-			const transaction = view.state.update({
-				changes: { from: 0, to: view.state.doc.length, insert: text }
-			});
+	setContent(text: string): void {
+		const transaction = this.view.state.update({
+			changes: { from: 0, to: this.view.state.doc.length, insert: text }
+		});
+		this.view.update([transaction]);
+	}
 
-			// Apply the transaction to the editor view
-			view.update([transaction]);
-		},
-		getScroll: function (): number {
-			const eScroller = e.querySelector('.cm-scroller');
-			if (!eScroller) {
-				throw new Error('cm-scroller element not found — is editor mounted?');
-			}
-			return eScroller.scrollTop;
-		},
-		setScroll: function (scrollTop: number) {
-			const eScroller = e.querySelector('.cm-scroller');
-			if (!eScroller) {
-				throw new Error('cm-scroller element not found — is editor mounted?');
-			}
-			eScroller.scrollTop = scrollTop;
-		},
-		getCursor: function (): number {
-			return view.state.selection.main.head;
-		},
-		setCursor: function (position: number) {
-			const selection = EditorSelection.create([EditorSelection.cursor(position)]);
-
-			const transaction = view.state.update({
-				selection: selection
-			});
-			view.dispatch(transaction);
-		},
-		setCompletions: function (completions: MarkdownCompletion[]) {
-			mdAutocomplete.setCompletions(completions);
-
-			// If tooltip visible recompute the completions
-			if (document.querySelector('.cm-tooltip-autocomplete')) {
-				startCompletion(view)  // Refresh completions
-			}
-		},
-		setTheme: function (newTheme: ThemeOptions) {
-			theme = newTheme;
-			init();
-		},
-		focus: function () {
-			view.focus();
-		},
-		setElement: function (element: HTMLElement) {
-			e = element;
-			init();
-		},
-		setEditable: function (isEdit: boolean) {
-			edit = isEdit
-			init() // todo: use comportment to update extension: https://discuss.codemirror.net/t/switch-between-editor-being-editable-or-not/2745/5
+	getScroll(): number {
+		const eScroller = this.e.querySelector('.cm-scroller');
+		if (!eScroller) {
+			throw new Error('cm-scroller element not found — is editor mounted?');
 		}
-	};
+		return eScroller.scrollTop;
+	}
+
+	setScroll(scrollTop: number): void {
+		const eScroller = this.e.querySelector('.cm-scroller');
+		if (!eScroller) {
+			throw new Error('cm-scroller element not found — is editor mounted?');
+		}
+		eScroller.scrollTop = scrollTop;
+	}
+
+	getCursor(): number {
+		return this.view.state.selection.main.head;
+	}
+
+	setCursor(position: number): void {
+		const selection = EditorSelection.create([EditorSelection.cursor(position)]);
+		const transaction = this.view.state.update({
+			selection: selection
+		});
+		this.view.dispatch(transaction);
+	}
+
+	setCompletions(completions: MarkdownCompletion[]): void {
+		this.mdAutocomplete.setCompletions(completions);
+		if (document.querySelector('.cm-tooltip-autocomplete')) {
+			startCompletion(this.view);
+		}
+	}
+
+	setTheme(newTheme: ThemeOptions): void {
+		this.theme = newTheme;
+		this.init();
+	}
+
+	focus(): void {
+		this.view.focus();
+	}
+
+	setElement(element: HTMLElement): void {
+		this.e = element;
+		this.init();
+	}
+
+	setEditable(isEdit: boolean): void {
+		this.edit = isEdit;
+		this.init();
+	}
+
+	on(event: string, callback: Callback): void {
+		if (!this.eventListeners[event]) {
+			this.eventListeners[event] = [];
+		}
+		this.eventListeners[event].push({ callback });
+	}
+
+	off(event: string, listener: Callback): void {
+		if (this.eventListeners[event]) {
+			this.eventListeners[event] = this.eventListeners[event].filter(
+				(eventListener) => eventListener.callback !== listener
+			);
+		}
+	}
 }
