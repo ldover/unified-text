@@ -234,14 +234,14 @@ export class UnifiedText {
 		this.init();
 	}
 
-	on(event: string, callback: Callback): void {
+	on(event: EditorEvent, callback: Callback): void {
 		if (!this.eventListeners[event]) {
 			this.eventListeners[event] = [];
 		}
 		this.eventListeners[event].push({ callback });
 	}
 
-	off(event: string, listener: Callback): void {
+	off(event: EditorEvent, listener: Callback): void {
 		if (this.eventListeners[event]) {
 			this.eventListeners[event] = this.eventListeners[event].filter(
 				(eventListener) => eventListener.callback !== listener
