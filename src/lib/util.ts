@@ -17,7 +17,7 @@ export function extractLink(node: SyntaxNode, view: EditorView): string | null {
 	if (node.type.name === 'Link') {
 		const tokenText = view.state.doc.sliceString(node.from, node.to);
 		// Extract the URL part of the link
-		const urlMatch = tokenText.match(/\(([^)]+)\)/);
+		const urlMatch = tokenText.match(/\[.*?\]\((.*?)\)/);
 		if (urlMatch && urlMatch[1]) {
 			return urlMatch[1];
 		}
