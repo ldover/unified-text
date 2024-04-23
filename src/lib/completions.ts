@@ -3,7 +3,7 @@ import type { CompletionContext, CompletionResult  } from '@codemirror/autocompl
 import type { EditorView } from 'codemirror';
 
 export interface MarkdownCompletion {
-	node: 'link' | 'image';
+	embeddable?: boolean
 	name: string; // name to match
 	title: string; // title to use in the link or image
 	path: string;
@@ -12,12 +12,12 @@ export interface MarkdownCompletion {
 	detail?: string
 }
 
-export function completeImageLinks(
+export function completeLinksAndEmbeds(
 	context: CompletionContext,
-	images: MarkdownCompletion[],
+	embeds: MarkdownCompletion[],
 	links: MarkdownCompletion[]
 ): CompletionResult | null {
-	const formatImage = (completion: MarkdownCompletion) =>
+	const formatEmbed = (completion: MarkdownCompletion) =>
 		`![${completion.name}](${completion.path})`;
 	const formatLink = (completion: MarkdownCompletion) => `[${completion.name}](${completion.path})`;
 
@@ -53,7 +53,7 @@ export function completeImageLinks(
 		const endImageNode = nodeBefore.to; // to `]` or `)`, which depends on whether URL part is present
 		return {
 			from: nodeBefore.from + 2, // Start matching after `![`
-			options: createOptions(startImageNode, endImageNode, images, formatImage)
+			options: createOptions(startImageNode, endImageNode, embeds, formatEmbed)
 		};
 	} else if (nodeBefore.name === 'URL' && nodeBefore0.name === 'Image') {
 		const startImageNode = nodeBefore.from - 4; // from "!"
@@ -61,7 +61,7 @@ export function completeImageLinks(
 
 		return {
 			from: nodeBefore.from, // Start matching from the start of URL node as '()' are not part of URL
-			options: createOptions(startImageNode, endImageNode, images, formatImage)
+			options: createOptions(startImageNode, endImageNode, embeds, formatEmbed)
 		};
 	} else if (nodeBefore.name === 'Link') {
 		return {
@@ -75,11 +75,11 @@ export function completeImageLinks(
 
 export function getMarkdownAutocomplete(completions: MarkdownCompletion[]) {
 	let linkCompletions: MarkdownCompletion[] = [];
-	let imageCompletions: MarkdownCompletion[] = [];
+	let embedCompletions: MarkdownCompletion[] = [];
 
 	function _setCompletions(completions: MarkdownCompletion[]) {
-		linkCompletions = completions?.filter((c) => c.node === 'link');
-		imageCompletions = completions?.filter((c) => c.node === 'image');
+		linkCompletions = completions
+		embedCompletions = completions?.filter((c) => c.embeddable);
 	}
 
 	_setCompletions(completions);
@@ -89,7 +89,7 @@ export function getMarkdownAutocomplete(completions: MarkdownCompletion[]) {
 			_setCompletions(completions);
 		},
 		autocomplete: function (context: CompletionContext) {
-			return completeImageLinks(context, imageCompletions, linkCompletions);
+			return completeLinksAndEmbeds(context, embedCompletions, linkCompletions);
 		}
 	};
 }

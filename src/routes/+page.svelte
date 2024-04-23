@@ -2,6 +2,7 @@
 	import { UnifiedText } from '../lib/editor.js';
 	import Editor from '../lib/Editor.svelte';
 	import { bear, oceanBlue } from '../lib/theme';
+	import type {MarkdownCompletion} from "$lib/completions.js";
 
 	const content = `# Sample heading
 Trying out [Links](somelink.md) and **bold** and *italic* and ~~strikethrough~~  lists:
@@ -46,20 +47,19 @@ As text
 	let editor;
 
 	function onEditorMount(e) {
-		let completions = [
-			{node: 'image', name: 'favicon.png', title: 'favicon.png', path: '/favicon.png'},
-			{type: 'image', node: 'link', name: 'favicon.png', title: 'favicon.png', path: '/favicon.png'},
-			{type: 'image', node: 'link', name: 'knowledge-universe.png', title: 'knowledge-universe.png', path: '/favicon.png'},
-			{type: 'note', node: 'link', name: 'Quality', title: 'Quality', path: 'datastore://quality.md'},
-			{type: 'note', node: 'link', name: 'Value', title: 'Value', path: 'datastore://value.md'},
-			{type: 'note', node: 'link', name: 'Action', title: 'Action', path: 'datastore://value.md'},
-			{type: 'note', node: 'link', name: 'Knowledge', title: 'Knowledge', path: 'datastore://value.md'},
-			{detail: '#evergreen', boost: 99, type: 'note', node: 'link', name: 'Knowledge 2', title: 'Knowledge 2', path: 'datastore://value.md'},
-			{detail: '#evergreen', boost: 0, type: 'note', node: 'link', name: 'Knowledge 3', title: 'Knowledge 3', path: 'datastore://value.md'},
-			{detail: '#evergreen', boost: 50, type: 'note', node: 'link', name: 'Knowledge 4', title: 'Knowledge 4', path: 'datastore://value.md'},
-			{detail: '#logs', boost: 30, type: 'log', node: 'link', name: 'Knowledge log', title: 'Knowledge log', path: 'datastore://value.md'},
-			{detail: 'inbox', node: 'link', name: 'Knowledge applications', title: 'Knowledge applications', path: 'datastore://value.md'},
-			{detail: 'inbox', node: 'link', name: 'Knowledge stack', title: 'Knowledge stack', path: 'datastore://value.md'}
+		let completions: MarkdownCompletion[] = [
+			{embeddable: true, type: 'image', name: 'favicon.png', title: 'favicon.png', path: '/favicon.png'},
+			{embeddable: true, type: 'image', name: 'knowledge-universe.png', title: 'knowledge-universe.png', path: '/favicon.png'},
+			{type: 'note', name: 'Quality', title: 'Quality', path: 'datastore://quality.md'},
+			{type: 'note', name: 'Value', title: 'Value', path: 'datastore://value.md'},
+			{type: 'note', name: 'Action', title: 'Action', path: 'datastore://value.md'},
+			{type: 'note', name: 'Knowledge', title: 'Knowledge', path: 'datastore://value.md'},
+			{detail: '#evergreen', boost: 99, type: 'note', name: 'Knowledge 2', title: 'Knowledge 2', path: 'datastore://value.md'},
+			{detail: '#evergreen', boost: 0, type: 'note', name: 'Knowledge 3', title: 'Knowledge 3', path: 'datastore://value.md'},
+			{detail: '#evergreen', boost: 50, type: 'note', name: 'Knowledge 4', title: 'Knowledge 4', path: 'datastore://value.md'},
+			{detail: '#logs', boost: 30, type: 'log', name: 'Knowledge log', title: 'Knowledge log', path: 'datastore://value.md'},
+			{detail: 'inbox', name: 'Knowledge applications', title: 'Knowledge applications', path: 'datastore://value.md'},
+			{detail: 'inbox', name: 'Knowledge stack', title: 'Knowledge stack', path: 'datastore://value.md'}
 		];
 		editor = new UnifiedText({
 			// theme: oceanBlue,
