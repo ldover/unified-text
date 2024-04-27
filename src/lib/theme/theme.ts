@@ -210,6 +210,11 @@ export interface MarkdownSettings {
 	 * Hidden URL style (`cm-hidden-url`)
 	 */
 	urlWidget?: StyleSpec;
+
+	/**
+	 * Editor content style (`cm-content`)
+	 */
+	editorContent?: StyleSpec
 }
 
 
@@ -224,7 +229,8 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		},
 		urlWidget: {
 			color: '#D9D9D9'
-		}
+		},
+		editorContent: {}
 	};
 
 	const opts = Object.assign({}, defaults, settings || {});
@@ -247,103 +253,104 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 
 	const addStyles = Object.fromEntries(iconStyles)
 
-	const theme = EditorView.theme(
-		{
-			'&': {
-				width: '100%',
-				height: '100%',
-				color: '#1f1f1f',
-				backgroundColor: opts.background
-			},
-			'&.cm-focused': {
-				outline: 'none' // Hide the outline of the focused editor
-			},
-			'.cm-img': opts.imgWidget,
-			'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
-			'.cm-scroller': {
-				paddingTop: '40px',
-				paddingBottom: '50%', // Add bottom padding so user can scroll past the editor content
-				width: '100%',
-				justifyContent: 'center'
-			},
-			'.cm-content': {
-				caretColor: opts.caret,
-				fontSize: opts.defaultFontSize,
-				fontFamily: opts.defaultFont,
-				maxWidth: opts.width,
-				width: opts.width,
-				color: opts.foreground
-			},
-			'.cm-activeLine': {
-				backgroundColor: 'transparent' // Don't show active line
-			},
-			'.cm-line': {
-				lineHeight: opts.lineHeight,
-				padding: '0 54px' // todo: why this padding this necessary
-			},
-			'&.cm-focused .cm-cursor': {
-				borderLeftColor: opts.caret, // Caret
-				borderLeftWidth: '2px'
-			},
-			'.cm-gutters': {
-				display: 'none' // Hide gutters
-			},
-			'&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket': {
-				backgroundColor: 'transparent' // Override highlighting for matching bracket
-			},
-			'.cm-selectionMatch': {
-				backgroundColor: 'transparent' // Override highlighting text that matches selection
-			},
-			'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
-				{ backgroundColor: opts.selection },
-			'.cm-tooltip': {
-				// todo: border doesn't show in dark mode
-				//   - box shadow might need customization for dark mode
-				borderColor: opts.tooltipBorder,
-				boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.1)',
-				borderRadius: '10px',
-				padding: '8px',
-				backgroundColor: opts.background
-			},
-			...addStyles,
-			".cm-completionIcon": {
-				fontSize: "90%",
-				width: "1em",
-				display: "inline-block",
-				textAlign: "center",
-				paddingRight: ".6em",
-				opacity: "1.0",
-				boxSizing: "content-box",
-				transform: "scale(0.8)"
-			},
-			'.cm-tooltip-autocomplete': {
-				'& > ul > li > .cm-completionLabel': {
-					fontFamily: opts.defaultFont,
-					color: opts.foreground,
-					fontSize: '14px'
-				},
-				'& > ul > li > .cm-completionDetail': {
-					fontStyle: 'normal',
-					fontFamily: opts.defaultFont,
-					color: opts.foreground,
-					opacity: 0.5,
-					fontSize: '12px',
-					fontWeight: 'light'
-				},
-				'& > ul > li > .cm-completionLabel > .cm-completionMatchedText': {
-					fontWeight: 'bold',
-					textDecoration: 'none'
-				},
-				'& > ul > li[aria-selected]': {
-					backgroundColor: opts.tooltipSelectionBackground,
-					color: opts.foreground,
-					borderRadius: '4px'
-				}
-			}
+	const css = {
+		'&': {
+			width: '100%',
+			height: '100%',
+			color: '#1f1f1f',
+			backgroundColor: opts.background
 		},
-		{
-			dark: dark
+		'&.cm-focused': {
+			outline: 'none' // Hide the outline of the focused editor
+		},
+		'.cm-img': opts.imgWidget,
+		'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
+		'.cm-scroller': {
+			paddingTop: '40px',
+			paddingBottom: '50%', // Add bottom padding so user can scroll past the editor content
+			width: '100%',
+			justifyContent: 'center'
+		},
+		'.cm-content': {
+			caretColor: opts.caret,
+			fontSize: opts.defaultFontSize,
+			fontFamily: opts.defaultFont,
+			maxWidth: opts.width,
+			width: opts.width,
+			color: opts.foreground,
+			...opts.editorContent // Extra styles
+		},
+		'.cm-activeLine': {
+			backgroundColor: 'transparent' // Don't show active line
+		},
+		'.cm-line': {
+			lineHeight: opts.lineHeight,
+			padding: '0 54px' // todo: why is this padding necessary?
+		},
+		'&.cm-focused .cm-cursor': {
+			borderLeftColor: opts.caret, // Caret
+			borderLeftWidth: '2px'
+		},
+		'.cm-gutters': {
+			display: 'none' // Hide gutters
+		},
+		'&.cm-focused .cm-matchingBracket, &.cm-focused .cm-nonmatchingBracket': {
+			backgroundColor: 'transparent' // Override highlighting for matching bracket
+		},
+		'.cm-selectionMatch': {
+			backgroundColor: 'transparent' // Override highlighting text that matches selection
+		},
+		'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection':
+			{ backgroundColor: opts.selection },
+		'.cm-tooltip': {
+			// todo: border doesn't show in dark mode
+			//   - box shadow might need customization for dark mode
+			borderColor: opts.tooltipBorder,
+			boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.1)',
+			borderRadius: '10px',
+			padding: '8px',
+			backgroundColor: opts.background
+		},
+		...addStyles,
+		".cm-completionIcon": {
+			fontSize: "90%",
+			width: "1em",
+			display: "inline-block",
+			textAlign: "center",
+			paddingRight: ".6em",
+			opacity: "1.0",
+			boxSizing: "content-box",
+			transform: "scale(0.8)"
+		},
+		'.cm-tooltip-autocomplete': {
+			'& > ul > li > .cm-completionLabel': {
+				fontFamily: opts.defaultFont,
+				color: opts.foreground,
+				fontSize: '14px'
+			},
+			'& > ul > li > .cm-completionDetail': {
+				fontStyle: 'normal',
+				fontFamily: opts.defaultFont,
+				color: opts.foreground,
+				opacity: 0.5,
+				fontSize: '12px',
+				fontWeight: 'light'
+			},
+			'& > ul > li > .cm-completionLabel > .cm-completionMatchedText': {
+				fontWeight: 'bold',
+				textDecoration: 'none'
+			},
+			'& > ul > li[aria-selected]': {
+				backgroundColor: opts.tooltipSelectionBackground,
+				color: opts.foreground,
+				borderRadius: '4px'
+			}
 		}
+	};
+
+	const theme = EditorView.theme(
+		css,
+		{ dark: dark }
 	);
 
 	function toTagStyles (styles: MarkdownNodeStyle[]): TagStyle[] {

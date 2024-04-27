@@ -1,10 +1,10 @@
 {
 	"name": "unified-text",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",
-		"pack": "npm run package && npm pack",
+		"pack": "vite build && npm run package && npm pack",
 		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
 		"prepublishOnly": "npm run package",
