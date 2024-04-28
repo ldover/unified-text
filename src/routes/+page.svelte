@@ -70,6 +70,8 @@ As text
 
 		editor.on('link-click', (url) => console.log({url}))
 		editor.on('change', (content) => console.log({content}))
+		editor.on('selection-change', (selection) => console.log(editor.serializeSelection(selection)))
+		editor.on('scroll', (scroll) => console.log({scroll}))
 		editor.setElement(e.detail)
 	}
 </script>

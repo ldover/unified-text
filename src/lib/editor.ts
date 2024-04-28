@@ -7,13 +7,18 @@ import { type MarkdownConfig, Strikethrough, TaskList } from '@lezer/markdown';
 import { styleTags, tags as t } from '@lezer/highlight';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
-import { EditorSelection, Prec } from '@codemirror/state';
-import { getMarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
+import { EditorSelection, Prec, SelectionRange } from '@codemirror/state';
+import { MarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { imageWidget, linkWidget } from './widgets.js';
 import { extractLink, nodeAtPosition } from './util.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
 import { bold, emphasize, strikethrough } from './commands.js';
+
+interface SelectionSerialized {
+	ranges: any[];
+	mainIndex: number;
+}
 
 export const ExtendedStyles: MarkdownConfig = {
 	props: [
@@ -51,7 +56,7 @@ function isFontAvailable(fontName: string) {
 
 type Callback = (...args: unknown[]) => void;
 
-type EditorEvent = 'change' | 'link-click';
+type EditorEvent = 'change' | 'selection-change' | 'scroll' | 'link-click';
 
 interface Listener {
 	callback: Callback;
@@ -76,19 +81,21 @@ const formattingShortcuts: KeyBinding[] = [
 ];
 
 export class UnifiedText {
-	private view: EditorView | null;
-	private edit: boolean;
+	private view: EditorView | null = null;
+	private edit: boolean = true;
 	private theme: ThemeOptions;
 	private e: HTMLElement | null;
-	private mdAutocomplete: unknown; // todo
+	private mdAutocomplete: MarkdownAutocomplete;
 
-	private readonly eventListeners: { [event: string]: Listener[] };
+	private prevContent: string | null = null;
+	private prevSelection: EditorSelection | null = null;
+	private prevScrollTop: number | null = null;
+	private listeners: EventListener[] = []
+
+	private readonly eventListeners: { [event: string]: Listener[] } = {};
 
 	constructor(options: EditorOptions) {
-		this.mdAutocomplete = getMarkdownAutocomplete(options.completions || []);
-
-		this.view = null;
-		this.edit = true;
+		this.mdAutocomplete = new MarkdownAutocomplete(options.completions || []);
 
 		this.theme = options.theme;
 		this.e = options.e || null;
@@ -98,8 +105,6 @@ export class UnifiedText {
 				throw new Error(`${font} not available`);
 			}
 		});
-
-		this.eventListeners = {};
 
 		// If element was passed
 		this.e && this.init(options.content || '');
@@ -121,10 +126,6 @@ export class UnifiedText {
 		if (this.view) {
 			this.view.destroy();
 		}
-
-		this.e.addEventListener('keyup', () => {
-			this.emit('change', this.view.state.toJSON().doc);
-		});
 
 		const extensions = [
 			basicSetup,
@@ -167,17 +168,43 @@ export class UnifiedText {
 			extensions,
 			parent: this.e
 		});
+
+		const self = this;
+
+		// Reset variables
+		this.prevContent = null;
+		this.prevSelection = null;
+		this.prevScrollTop = null;
+
+		// Mount listeners to emit editor events
+		for (const ev of ['keyup', 'click']) {
+			// First remove any listeners from previous init
+			for (const listener of this.listeners) {
+				this.e.removeEventListener(ev, listener);
+			}
+			this.listeners = [this.checkContentChange.bind(this), this.checkSelectionChange.bind(this)];
+			for (const listener of this.listeners) {
+				this.e.addEventListener(ev, listener);
+			}
+		}
+
+		// Mount a scroll listener onto editor's cm-scroller selector
+		const scrollEl = this.e.querySelector('.cm-scroller') as HTMLElement;
+
+		scrollEl.addEventListener('scroll', function () {
+			if (this.scrollTop != self.prevScrollTop) {
+				self.prevScrollTop = this.scrollTop;
+				self.emit('scroll', this.scrollTop);
+			}
+		});
 	}
 
 	getContent(): string {
-		return this.view.state.toJSON().doc;
+		return this.view?.state.toJSON().doc || '';
 	}
 
 	setContent(text: string): void {
-		const transaction = this.view.state.update({
-			changes: { from: 0, to: this.view.state.doc.length, insert: text }
-		});
-		this.view.update([transaction]);
+		this.init(text);
 	}
 
 	getScroll(): number {
@@ -191,21 +218,47 @@ export class UnifiedText {
 	setScroll(scrollTop: number): void {
 		const eScroller = this.e.querySelector('.cm-scroller');
 		if (!eScroller) {
-			throw new Error('cm-scroller element not found — is editor mounted?');
+			throw new Error('cm-scroller element not found — is the editor mounted?');
 		}
-		eScroller.scrollTop = scrollTop;
+
+		// The following code attempts to set scroll positions until it stabilizes to the given value.
+		// Setting it only once doesn't appear to work for some scrollTop values.
+	    //  todo: check if we can use simpler and idiomatic expression like EditorView.scrollIntoView instead
+
+		const maxAttempts = 10; // Limit the number of attempts to avoid potential infinite loops
+		let attempts = 0;
+
+		const setScrollPosition = () => {
+			if (eScroller.scrollTop !== scrollTop && attempts < maxAttempts) {
+				eScroller.scrollTop = scrollTop;
+				attempts++;
+				requestAnimationFrame(setScrollPosition);
+			} else {
+				console.log('Scroll position stabilized or max attempts reached:', eScroller.scrollTop);
+			}
+		};
+
+		setScrollPosition();
 	}
 
-	getCursor(): number {
-		return this.view.state.selection.main.head;
+	getSelection(): EditorSelection {
+		return this.view.state.selection;
 	}
 
-	setCursor(position: number): void {
-		const selection = EditorSelection.create([EditorSelection.cursor(position)]);
-		const transaction = this.view.state.update({
-			selection: selection
-		});
+	setSelection(selection: EditorSelection) {
+		const transaction = this.view.state.update({ selection: selection });
 		this.view.dispatch(transaction);
+	}
+
+	serializeSelection(selection: EditorSelection): SelectionSerialized {
+		return {
+			ranges: selection.ranges.map((range) => range.toJSON()),
+			mainIndex: selection.mainIndex
+		};
+	}
+
+	deserializeSelection(json: SelectionSerialized): EditorSelection {
+		return EditorSelection.create(json.ranges.map(SelectionRange.fromJSON), json.mainIndex);
 	}
 
 	setCompletions(completions: MarkdownCompletion[]): void {
@@ -217,7 +270,7 @@ export class UnifiedText {
 
 	setTheme(newTheme: ThemeOptions): void {
 		this.theme = newTheme;
-		this.init();
+		this.init(this.getContent());
 	}
 
 	focus(): void {
@@ -231,7 +284,7 @@ export class UnifiedText {
 
 	setEditable(isEdit: boolean): void {
 		this.edit = isEdit;
-		this.init();
+		this.init(this.getContent());
 	}
 
 	on(event: EditorEvent, callback: Callback): void {
@@ -246,6 +299,22 @@ export class UnifiedText {
 			this.eventListeners[event] = this.eventListeners[event].filter(
 				(eventListener) => eventListener.callback !== listener
 			);
+		}
+	}
+
+	private checkContentChange() {
+		const content = this.getContent();
+		if (content != this.prevContent) {
+			this.prevContent = content;
+			this.emit('change', content);
+		}
+	}
+
+	private checkSelectionChange() {
+		const selection = this.getSelection();
+		if (!this.prevSelection || !selection.eq(this.prevSelection)) {
+			this.prevSelection = selection;
+			this.emit('selection-change', selection);
 		}
 	}
 }

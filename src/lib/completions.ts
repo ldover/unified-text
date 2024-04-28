@@ -73,23 +73,23 @@ export function completeLinksAndEmbeds(
 	return null;
 }
 
-export function getMarkdownAutocomplete(completions: MarkdownCompletion[]) {
-	let linkCompletions: MarkdownCompletion[] = [];
-	let embedCompletions: MarkdownCompletion[] = [];
 
-	function _setCompletions(completions: MarkdownCompletion[]) {
-		linkCompletions = completions
-		embedCompletions = completions?.filter((c) => c.embeddable);
+export class MarkdownAutocomplete {
+	private linkCompletions: MarkdownCompletion[];
+	private embedCompletions: MarkdownCompletion[];
+
+	constructor(completions: MarkdownCompletion[]) {
+		this.linkCompletions = [];
+		this.embedCompletions = [];
+		this.setCompletions(completions);
 	}
 
-	_setCompletions(completions);
+	public setCompletions(completions: MarkdownCompletion[]) {
+		this.linkCompletions = completions;
+		this.embedCompletions = completions?.filter((c) => c.embeddable);
+	}
 
-	return {
-		setCompletions: function (completions: MarkdownCompletion[]) {
-			_setCompletions(completions);
-		},
-		autocomplete: function (context: CompletionContext) {
-			return completeLinksAndEmbeds(context, embedCompletions, linkCompletions);
-		}
-	};
+	public autocomplete(context: CompletionContext) {
+		return completeLinksAndEmbeds(context, this.embedCompletions, this.linkCompletions);
+	}
 }
