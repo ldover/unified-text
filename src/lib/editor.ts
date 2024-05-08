@@ -233,8 +233,8 @@ export class UnifiedText {
 				eScroller.scrollTop = scrollTop;
 				attempts++;
 				requestAnimationFrame(setScrollPosition);
-			} else {
-				console.log('Scroll position stabilized or max attempts reached:', eScroller.scrollTop);
+			} else if (eScroller.scrollTop !== scrollTop){
+				console.warn('Scroll position failed to restore: max attempts reached');
 			}
 		};
 

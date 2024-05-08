@@ -73,6 +73,7 @@ As text
 		editor.on('selection-change', (selection) => console.log(editor.serializeSelection(selection)))
 		editor.on('scroll', (scroll) => console.log({scroll}))
 		editor.setElement(e.detail)
+		editor.setContent(content)
 	}
 </script>
 
