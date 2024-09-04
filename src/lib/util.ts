@@ -14,7 +14,7 @@ export function nodeAtPosition(event: MouseEvent, view: EditorView): SyntaxNode 
 }
 
 export function extractLink(node: SyntaxNode, view: EditorView): string | null {
-	if (node.type.name === 'Link') {
+	if (node.type.name === 'Link' || node.type.name === 'Image') {
 		const tokenText = view.state.doc.sliceString(node.from, node.to);
 		// Extract the URL part of the link
 		const urlMatch = tokenText.match(/\[.*?\]\((.*?)\)/);

@@ -150,7 +150,7 @@ export class UnifiedText {
 					if (!event.metaKey) return false; // Only run when CMD key is pressed, normal click is to edit link
 
 					const node = nodeAtPosition(event, view);
-					if (node && ['Link', 'URL'].includes(node.type.name)) {
+					if (node && ['Image', 'Link', 'URL'].includes(node.type.name)) {
 						const url = extractLink(node, view);
 						if (url) {
 							this.emit('link-click', url);
