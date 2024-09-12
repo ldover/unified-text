@@ -345,6 +345,51 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 				color: opts.foreground,
 				borderRadius: '4px'
 			}
+		},
+		'.cm-search.cm-panel': {
+			textTransform: 'capitalize',
+			backgroundColor: '#ffffff',
+			padding: '46px 86px 4px 22px',
+			fontFamily: opts.defaultFont,
+
+			'& > .cm-textfield': {
+				borderRadius: '5px',
+				fontSize: '14px',
+			},
+			'& > label': {
+				color: '#27272a',
+			},
+			'& input[type=checkbox]': {
+				verticalAlign: 'text-bottom'
+			},
+			'& input[type=checkbox]:focus-visible': {
+				outline: '2px solid #fdba74',
+			},
+			'& > .cm-textfield:focus': {
+				outline: '2px solid #fdba74',
+				border: '1px solid #fb923c',
+			},
+			'& > .cm-button': {
+				textTransform: 'capitalize',
+				border: 'none',
+				padding: '2px 12px',
+				borderRadius: '5px',
+				fontSize: '14px',
+				fontFamily: opts.defaultFont,
+				color: '#27272a',
+				backgroundColor: '#e4e4e7'
+			},
+			'& > .cm-button:focus-visible': {
+				outline: '2px solid #fdba74',
+			},
+			'& button[name=close]': {
+				top: '78px',
+				right: '24px',
+				color: '#a1a1aa',
+				fontSize: '34px',
+				background: 'none',
+				cursor: 'pointer'
+			}
 		}
 	};
 

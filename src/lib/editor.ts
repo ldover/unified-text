@@ -1,5 +1,6 @@
 import { basicSetup, EditorView } from 'codemirror';
 import { markdown } from '@codemirror/lang-markdown';
+import { search } from '@codemirror/search';
 import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
 import { type KeyBinding, keymap } from '@codemirror/view';
@@ -131,6 +132,7 @@ export class UnifiedText {
 			basicSetup,
 			EditorView.editable.of(this.edit),
 			createTheme(this.theme),
+			search({top: true}),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			Prec.highest(keymap.of(formattingShortcuts)), // Use highest precedence to override default keymap
 			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
@@ -275,6 +277,10 @@ export class UnifiedText {
 
 	focus(): void {
 		this.view.focus();
+	}
+
+	hasFocus(): boolean {
+		return this.view ? this.view.hasFocus : false
 	}
 
 	setElement(element: HTMLElement): void {
