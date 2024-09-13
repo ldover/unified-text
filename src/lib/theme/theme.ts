@@ -228,7 +228,8 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			maxHeight: '300px'
 		},
 		urlWidget: {
-			color: '#D9D9D9'
+			color: '#D9D9D9',
+			cursor: 'pointer'
 		},
 		editorContent: {}
 	};

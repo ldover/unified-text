@@ -127,12 +127,25 @@ export function linkWidget() {
 				to,
 				enter: (node) => {
 					const linkText = view.state.doc.sliceString(node.from, node.to);
+
+					// Check that our cursor is not within the URL node
+					function isCursorWithinNode(cursorPos: number) {
+						return cursorPos >= node.from && cursorPos <= node.to;
+					}
+
 					if (node.name == 'URL') {
-						// check that our cursor is not within the URL.
-						const cursorPos = view.state.selection.main.head;
-						if (cursorPos >= node.from && cursorPos <= node.to) {
-							// If cursor within the URL node
-							return; // Don't create decoration
+						// Don't create decoration for the URL in the following cases so the URL field stays open
+						if (view.state.selection.main.empty) {
+							// Keep URL field open when user's cursor is within the URL node
+							if (isCursorWithinNode(view.state.selection.main.head)) {
+								return
+							}
+						} else {
+							// Keep URL field open when selecting the URL (non-empty selection) and the
+							// anchor is within the URL node
+							if (isCursorWithinNode(view.state.selection.main.anchor)) {
+								return
+							}
 						}
 
 						const deco = Decoration.replace({
@@ -161,7 +174,7 @@ export function linkWidget() {
 			}
 		},
 		{
-			decorations: (v) => v.decorations
+			decorations: (v) => v.decorations,
 		}
 	);
 }
