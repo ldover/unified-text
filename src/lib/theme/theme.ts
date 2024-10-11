@@ -286,7 +286,8 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		},
 		'.cm-line': {
 			lineHeight: opts.lineHeight,
-			padding: '0 54px' // todo: why is this padding necessary?
+			paddingRight: '64px', // todo: why do we have this line-level padding, can't we apply padding to cm-scroller/cm-content?
+			paddingLeft: '84px' // Adjust for  MacOS traffic lights: todo: abstraction leak from Tiger -> text editor
 		},
 		'&.cm-focused .cm-cursor': {
 			borderLeftColor: opts.caret, // Caret
