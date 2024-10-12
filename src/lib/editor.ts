@@ -55,7 +55,7 @@ function isFontAvailable(fontName: string) {
 	return false;
 }
 
-type Callback = (...args: unknown[]) => void;
+type Callback = (arg: unknown, id: string) => void;
 
 type EditorEvent = 'change' | 'selection-change' | 'scroll' | 'link-click';
 
@@ -88,6 +88,7 @@ export class UnifiedText {
 	private e: HTMLElement | null;
 	private mdAutocomplete: MarkdownAutocomplete;
 
+	private id: string | null = null;  // Id of the file that is displayed in the editor; will be passed as an argument in callbacks
 	private prevContent: string | null = null;
 	private prevSelection: EditorSelection | null = null;
 	private prevScrollTop: number | null = null;
@@ -112,10 +113,10 @@ export class UnifiedText {
 	}
 
 	// Emit an event, triggering all listeners registered for this event
-	private emit(event: EditorEvent, ...args: unknown[]) {
+	private emit(event: EditorEvent, arg: unknown, id: string) {
 		const listeners = this.eventListeners[event];
 		if (listeners) {
-			listeners.forEach((eventListener) => eventListener.callback(...args));
+			listeners.forEach((eventListener) => eventListener.callback(arg, id));
 		}
 	}
 
@@ -155,7 +156,7 @@ export class UnifiedText {
 					if (node && ['Image', 'Link', 'URL'].includes(node.type.name)) {
 						const url = extractLink(node, view);
 						if (url) {
-							this.emit('link-click', url);
+							this.emit('link-click', url, this.id!);
 							return true;
 						}
 					}
@@ -196,7 +197,7 @@ export class UnifiedText {
 		scrollEl.addEventListener('scroll', function () {
 			if (this.scrollTop != self.prevScrollTop) {
 				self.prevScrollTop = this.scrollTop;
-				self.emit('scroll', this.scrollTop);
+				self.emit('scroll', this.scrollTop, self.id!);
 			}
 		});
 	}
@@ -205,7 +206,8 @@ export class UnifiedText {
 		return this.view?.state.toJSON().doc || '';
 	}
 
-	setContent(text: string): void {
+	setContent(text: string, id: string | null): void {
+		this.id = id
 		this.init(text);
 	}
 
@@ -312,7 +314,7 @@ export class UnifiedText {
 		const content = this.getContent();
 		if (content != this.prevContent) {
 			this.prevContent = content;
-			this.emit('change', content);
+			this.emit('change', content, this.id!);
 		}
 	}
 
@@ -320,7 +322,7 @@ export class UnifiedText {
 		const selection = this.getSelection();
 		if (!this.prevSelection || !selection.eq(this.prevSelection)) {
 			this.prevSelection = selection;
-			this.emit('selection-change', selection);
+			this.emit('selection-change', selection, this.id!);
 		}
 	}
 }
