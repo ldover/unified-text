@@ -38,6 +38,8 @@ const startAutocompleteKeymap: KeyBinding[] = [
 	{ key: 'Ctrl-Space', run: startCompletion, shift: () => false }
 ];
 
+const MAX_LISTENERS = 5
+
 interface EditorOptions {
 	e?: HTMLElement;
 	content?: string;
@@ -300,6 +302,9 @@ export class UnifiedText {
 			this.eventListeners[event] = [];
 		}
 		this.eventListeners[event].push({ callback });
+		if (this.eventListeners[event].length > MAX_LISTENERS) {
+			console.warn(`Memory leak detected: number of listeners (${this.eventListeners[event].length}) exceeds MAX_LISTENERS (${MAX_LISTENERS})`, this.eventListeners[event])
+		}
 	}
 
 	off(event: EditorEvent, listener: Callback): void {
