@@ -1,20 +1,21 @@
-import { basicSetup, EditorView } from 'codemirror';
-import { markdown } from '@codemirror/lang-markdown';
-import { search } from '@codemirror/search';
-import { languages } from '@codemirror/language-data';
 import { indentWithTab } from '@codemirror/commands';
-import { type KeyBinding, keymap } from '@codemirror/view';
-import { type MarkdownConfig, Strikethrough, TaskList } from '@lezer/markdown';
+import { markdown } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
+import { search } from '@codemirror/search';
+import { keymap, type KeyBinding } from '@codemirror/view';
 import { styleTags, tags as t } from '@lezer/highlight';
+import { Strikethrough, TaskList, type MarkdownConfig } from '@lezer/markdown';
+import { basicSetup, EditorView } from 'codemirror';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
 import { EditorSelection, Prec, SelectionRange } from '@codemirror/state';
+import { bold, emphasize, strikethrough } from './commands.js';
 import { MarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
-import { imageWidget, linkWidget } from './widgets.js';
-import { extractLink, nodeAtPosition } from './util.js';
+import { highlightPlugin } from './highlight.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
-import { bold, emphasize, strikethrough } from './commands.js';
+import { extractLink, nodeAtPosition } from './util.js';
+import { imageWidget, linkWidget } from './widgets.js';
 
 interface SelectionSerialized {
 	ranges: any[];
@@ -145,6 +146,7 @@ export class UnifiedText {
 				override: [(context) => this.mdAutocomplete.autocomplete(context)]
 			}),
 			linkWidget(),
+			highlightPlugin,
 			imageWidget(),
 			EditorView.lineWrapping,
 			EditorView.domEventHandlers({
@@ -213,6 +215,10 @@ export class UnifiedText {
 		this.init(text);
 	}
 
+	getHighlightPlugin() {
+		return this.view!.plugin(highlightPlugin);
+	}
+	
 	getScroll(): number {
 		const eScroller = this.e.querySelector('.cm-scroller');
 		if (!eScroller) {

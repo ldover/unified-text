@@ -220,6 +220,16 @@ export interface MarkdownSettings {
 	 * Editor content style (`cm-content`)
 	 */
 	editorContent?: StyleSpec
+
+	/**
+	 * Higlight style
+	 */
+	higlight?: StyleSpec
+
+	/**
+	 * Higlight style for active highlight
+	 */
+	higlightActive?: StyleSpec
 }
 
 
@@ -236,6 +246,13 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		urlWidget: {
 			color: '#D9D9D9',
 			cursor: 'pointer'
+		},
+		highlight: {
+			backgroundColor: 'yellow'
+		},
+		higlightActive: {
+			backgroundColor: 'yellow',
+			border: "1px solid black"
 		},
 		editorContent: {}
 	};
@@ -289,6 +306,12 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			width: opts.width,
 			color: opts.foreground,
 			...opts.editorContent // Extra styles
+		},
+		".cm-custom-highlight": { 
+			...opts.higlight
+		},
+		".cm-custom-highlight-emphasis": { 
+			...opts.higlightActive
 		},
 		'.cm-activeLine': {
 			backgroundColor: 'transparent' // Don't show active line

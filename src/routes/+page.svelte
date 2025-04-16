@@ -44,7 +44,9 @@ As text
 ###### heading 6`;
 
 
-	let editor;
+	let editor: UnifiedText;
+
+	let plugin
 
 	function onEditorMount(e) {
 		let completions: MarkdownCompletion[] = [
@@ -73,12 +75,25 @@ As text
 		editor.on('selection-change', (selection) => console.log(editor.serializeSelection(selection)))
 		editor.on('scroll', (scroll) => console.log({scroll}))
 		editor.setElement(e.detail)
-		editor.setContent(content)
+		editor.setContent(content, '1')
+
+		plugin = editor.getHighlightPlugin()
+		plugin?.set([{from: 0, to: 10, active: true, id: '1'}, 
+		{from: 20, to: 30, active: false, id: '2'}, 
+		{from: 400, to: 420, active: false, id: '3'}])
 	}
 </script>
 
 <div class="page">
 	<div class="controls">
+		<div>
+			Prev highlight
+			<button on:click={() => plugin.previous()}>Prev highlight</button>
+		</div>
+		<div>
+			Next highlight
+			<button on:click={() => plugin.next()}>Next highlight</button>
+		</div>
 		<div>
 			Focus
 			<button on:click={() => editor.focus()}>Focus</button>
