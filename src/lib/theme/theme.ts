@@ -182,6 +182,11 @@ export interface MarkdownSettings {
 	lineHeight?: string;
 
 	/**
+	 * Line padding
+	 */
+	linePadding?: StyleSpec
+
+	/**
 	 * Fonts required by this theme — used to check whether fonts are loaded
 	 */
 	requiredFonts?: string[];
@@ -223,6 +228,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		defaultFont: 'Roboto',
 		defaultFontSize: '18px',
 		lineHeight: '170%',
+		linePadding: {},
 		width: '900px',
 		imgWidget: {
 			maxHeight: '300px'
@@ -268,6 +274,9 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
 		'.cm-scroller': {
 			paddingTop: '40px',
+			// paddingRight: '64px',
+			// paddingLeft: '84px', // Adjust for  MacOS traffic lights: todo: abstraction leak from Tiger -> text editor
+
 			paddingBottom: '50%', // Add bottom padding so user can scroll past the editor content
 			width: '100%',
 			justifyContent: 'center'
@@ -286,8 +295,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		},
 		'.cm-line': {
 			lineHeight: opts.lineHeight,
-			paddingRight: '64px', // todo: why do we have this line-level padding, can't we apply padding to cm-scroller/cm-content?
-			paddingLeft: '84px' // Adjust for  MacOS traffic lights: todo: abstraction leak from Tiger -> text editor
+			...opts.linePadding
 		},
 		'&.cm-focused .cm-cursor': {
 			borderLeftColor: opts.caret, // Caret

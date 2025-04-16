@@ -97,7 +97,7 @@ As text
 
 <style>
 	.editor-container {
-		width: 100%;
+		width: 50%;
 		height: 100%;
 		/*max-height: 700px;*/
 		border: 1px solid black;
