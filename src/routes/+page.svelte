@@ -3,6 +3,7 @@
 	import Editor from '../lib/Editor.svelte';
 	import { bear, oceanBlue } from '../lib/theme';
 	import type {MarkdownCompletion} from "$lib/completions.js";
+	import { Highlighter } from '$lib/highlight.js';
 
 	const content = `# Sample heading
 Trying out [Links](somelink.md) and **bold** and *italic* and ~~strikethrough~~  lists:
@@ -46,7 +47,11 @@ As text
 
 	let editor: UnifiedText;
 
-	let plugin
+	let plugin: Highlighter
+
+	let highlights = [{from: 0, to: 10, id: '1'}, 
+		{from: 20, to: 30, id: '2'}, 
+		{from: 400, to: 420, id: '3'}]
 
 	function onEditorMount(e) {
 		let completions: MarkdownCompletion[] = [
@@ -76,23 +81,26 @@ As text
 		editor.on('scroll', (scroll) => console.log({scroll}))
 		editor.setElement(e.detail)
 		editor.setContent(content, '1')
-
-		plugin = editor.getHighlightPlugin()
-		plugin?.set([{from: 0, to: 10, active: true, id: '1'}, 
-		{from: 20, to: 30, active: false, id: '2'}, 
-		{from: 400, to: 420, active: false, id: '3'}])
+		editor.setEditable(false)
+		
+		plugin = editor.getHighlightPlugin()!
+		
+		plugin.set(highlights)
 	}
+	
+	let activeIndex = 0
 </script>
 
 <div class="page">
 	<div class="controls">
 		<div>
 			Prev highlight
-			<button on:click={() => plugin.previous()}>Prev highlight</button>
+			<button on:click={() => activeIndex = plugin.previous()}>Prev highlight</button>
 		</div>
+		<div>{activeIndex}/{highlights.length}</div>
 		<div>
 			Next highlight
-			<button on:click={() => plugin.next()}>Next highlight</button>
+			<button on:click={() => activeIndex = plugin.next()}>Next highlight</button>
 		</div>
 		<div>
 			Focus

@@ -4,14 +4,13 @@ const highlightMark = Decoration.mark({ class: "cm-custom-highlight" });
 const highlightMarkEmphasis = Decoration.mark({ class: "cm-custom-highlight-emphasis" });
 
 export type Highlight = {
-    id: string,
-    active: boolean,
-    from: number,
+    id: string
+    from: number
     to: number
 };
 
 
-class Highlighter {
+export class Highlighter {
 
     decorations: DecorationSet
 
@@ -37,21 +36,32 @@ class Highlighter {
         this.view.update([]);
     }
 
-    next() {
+    next(): number {
         if (this._activeIndex < this.highlights.length - 1) {
             this._activeIndex++
             this.decorations = this.computeDecorations();
-            this.navigate()
         }
-
+        this.navigate()
+        return this._activeIndex
     }
 
-    previous() {
+    previous(): number {
         if (this._activeIndex > 0) {
             this._activeIndex--
             this.decorations = this.computeDecorations();
-            this.navigate()
         }
+        this.navigate()
+        return this._activeIndex
+    }
+
+    navigate(): number {
+        if (this.highlights[this._activeIndex]) {
+            this.view.dispatch({
+                effects: EditorView.scrollIntoView(this.highlights[this._activeIndex].from, { y: "center" })
+            });
+        }
+
+        return this._activeIndex
     }
 
     update(update: ViewUpdate) {
@@ -64,14 +74,6 @@ class Highlighter {
     private computeDecorations() {
         const higlighths = this.highlights.map((h, i) => (i == this._activeIndex ? highlightMarkEmphasis : highlightMark).range(h.from, h.to))
         return Decoration.set(higlighths);
-    }
-
-    private navigate() {
-        if (this.highlights[this._activeIndex]) {
-            this.view.dispatch({
-                effects: EditorView.scrollIntoView(this.highlights[this._activeIndex].from, { y: "center" })
-            });
-        }
     }
 }
 

@@ -308,7 +308,8 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			...opts.editorContent // Extra styles
 		},
 		".cm-custom-highlight": { 
-			...opts.higlight
+			...opts.highlight
+
 		},
 		".cm-custom-highlight-emphasis": { 
 			...opts.higlightActive
