@@ -215,6 +215,28 @@ export class UnifiedText {
 		this.init(text);
 	}
 
+	/** 
+	 * Insert (or replace) text at the current cursor (or given) position,
+	 * without re-initializing the editor.
+	 */
+	public insert(text: string, position?: number): void {
+		if (!this.view) {
+		throw new Error('Editor not initialized.');
+		}
+		const { state } = this.view;
+		const { from, to } = state.selection.main;
+		// default to current cursor start if no explicit position
+		const insertPos = position ?? from;
+	
+		// dispatch a change + move the cursor to just after the inserted text
+		this.view.dispatch(
+		state.update({
+			changes: { from: insertPos, to, insert: text },
+			selection: { anchor: insertPos + text.length }
+		})
+		);
+	}
+
 	getHighlightPlugin() {
 		return this.view!.plugin(highlightPlugin);
 	}
