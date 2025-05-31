@@ -8,7 +8,7 @@ import { Strikethrough, TaskList, type MarkdownConfig } from '@lezer/markdown';
 import { basicSetup, EditorView } from 'codemirror';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
-import { EditorSelection, Prec, SelectionRange } from '@codemirror/state';
+import { EditorSelection, Prec, SelectionRange, Compartment } from '@codemirror/state';
 import { bold, emphasize, strikethrough } from './commands.js';
 import { MarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { highlightPlugin } from './highlight.js';
@@ -16,6 +16,10 @@ import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
 import { extractLink, nodeAtPosition } from './util.js';
 import { imageWidget, linkWidget } from './widgets.js';
+
+
+const editableCompartment = new Compartment();
+
 
 interface SelectionSerialized {
 	ranges: any[];
@@ -86,7 +90,6 @@ const formattingShortcuts: KeyBinding[] = [
 
 export class UnifiedText {
 	private view: EditorView | null = null;
-	private edit: boolean = true;
 	private theme: ThemeOptions;
 	private e: HTMLElement | null;
 	private mdAutocomplete: MarkdownAutocomplete;
@@ -134,7 +137,7 @@ export class UnifiedText {
 
 		const extensions = [
 			basicSetup,
-			EditorView.editable.of(this.edit),
+			editableCompartment.of(EditorView.editable.of(true)),
 			createTheme(this.theme),
 			search({top: true}),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
@@ -320,9 +323,16 @@ export class UnifiedText {
 		this.init();
 	}
 
-	setEditable(isEdit: boolean): void {
-		this.edit = isEdit;
-		this.init(this.getContent());
+	setEditable(isEditable: boolean) {
+		this.view?.dispatch({
+			effects: editableCompartment.reconfigure(
+				EditorView.editable.of(isEditable)                 // ③ swap without re-init
+			)
+		});
+	}
+
+	isEditable(): boolean {
+		return this.view ? this.view.state.facet(EditorView.editable) : false;
 	}
 
 	on(event: EditorEvent, callback: Callback): void {
