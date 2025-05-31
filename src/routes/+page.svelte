@@ -86,6 +86,10 @@ As text
 		plugin = editor.getHighlightPlugin()!
 		
 		plugin.set(highlights)
+		setTimeout(() => {
+			console.log('scroll down')
+			editor.insert('testing', editor.getContent().length)
+		}, 5000)
 	}
 	
 	let activeIndex = 0
@@ -108,7 +112,7 @@ As text
 		</div>
 		<div>
 			Editable
-			<button on:click={() => editor.setEditable(false)}>set read only</button>
+			<button on:click={() => editor.setEditable(!editor.isEditable())}>Toggle editable</button>
 		</div>
 	</div>
 
