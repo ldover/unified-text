@@ -219,21 +219,15 @@ export class UnifiedText {
 	 * Insert (or replace) text at the current cursor (or given) position,
 	 * without re-initializing the editor.
 	 */
-	public insert(text: string, position?: number): void {
+	public insert(text: string, position: number): void {
 		if (!this.view) {
-		throw new Error('Editor not initialized.');
+			return
 		}
 		const { state } = this.view;
-		const { from, to } = state.selection.main;
-		// default to current cursor start if no explicit position
-		const insertPos = position ?? from;
-	
-		// dispatch a change + move the cursor to just after the inserted text
 		this.view.dispatch(
-		state.update({
-			changes: { from: insertPos, to, insert: text },
-			selection: { anchor: insertPos + text.length }
-		})
+			state.update({
+				changes: { from: position, insert: text },
+			})
 		);
 	}
 
@@ -273,6 +267,12 @@ export class UnifiedText {
 		};
 
 		setScrollPosition();
+	}
+
+	scrollToBottom() {
+		this.view?.dispatch({
+			effects: EditorView.scrollIntoView(this.view.state.doc.length)
+		});
 	}
 
 	getSelection(): EditorSelection {
