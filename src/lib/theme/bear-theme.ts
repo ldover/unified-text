@@ -31,7 +31,9 @@ const settings: MarkdownSettings = {
 	foreground: color.fontGray,
 	selection: color.selectionBackground,
 	caret: color.red,
-
+	blockquote: {
+		borderLeft: `6px solid ${red}`,
+	},
 	width: '900px',
 
 	requiredFonts: ['BearSansUI', 'BearSansUIHeadline', 'Roboto Mono'],
@@ -121,8 +123,12 @@ const styles: MarkdownNodeStyle[] = [
 		color: color.linkBracketGray
 	},
 	{
-		node: ['URL', 'ListMark', 'QuoteMark', 'HardBreak', 'TaskMarker'],
+		node: ['URL', 'ListMark', 'HardBreak', 'TaskMarker'],
 		color: color.red
+	},
+	{
+		node: 'QuoteMark',
+		color: color.linkBracketGray
 	},
 	{
 		node: 'CodeText',

@@ -15,7 +15,7 @@ import { highlightPlugin } from './highlight.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
 import { extractLink, nodeAtPosition } from './util.js';
-import { imageWidget, linkWidget } from './widgets.js';
+import { blockquoteStyling, imageWidget, linkWidget } from './widgets.js';
 
 
 const editableCompartment = new Compartment();
@@ -150,6 +150,7 @@ export class UnifiedText {
 			}),
 			linkWidget(),
 			highlightPlugin,
+			blockquoteStyling,
 			imageWidget(),
 			EditorView.lineWrapping,
 			EditorView.domEventHandlers({

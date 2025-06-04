@@ -6,7 +6,7 @@ import {
 	EditorView,
 	ViewUpdate
 } from '@codemirror/view';
-import type { Range } from '@codemirror/state';
+import { RangeSetBuilder, type Range } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 
 /**
@@ -178,3 +178,42 @@ export function linkWidget() {
 		}
 	);
 }
+
+
+export const blockquoteStyling = ViewPlugin.fromClass(class {
+  decorations: DecorationSet
+
+  constructor(view: EditorView) {
+    this.decorations = this.build(view);
+  }
+
+  update(update: ViewUpdate) {
+    if (update.docChanged || update.viewportChanged)
+      this.decorations = this.build(update.view);
+  }
+
+  /** Scan visible ranges, add a line decoration to every block-quote line */
+  build(view: EditorView) {
+    const builder = new RangeSetBuilder<Decoration>();
+    const tree = syntaxTree(view.state);
+
+    tree.iterate({
+      enter(node) {
+        if (node.name === "Blockquote") {
+          let lnFrom = view.state.doc.lineAt(node.from).number;
+          let lnTo   = view.state.doc.lineAt(node.to).number;
+          for (let l = lnFrom; l <= lnTo; l++) {
+            let pos = view.state.doc.line(l).from;
+            builder.add(pos, pos, Decoration.line({class: "cm-blockquote"}));
+          }
+        }
+      },
+      // only look at what’s on screen for speed
+      from: view.viewport.from, to: view.viewport.to
+    });
+    return builder.finish();
+  }
+},{
+  decorations: v => v.decorations
+});
+

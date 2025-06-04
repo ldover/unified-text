@@ -207,6 +207,11 @@ export interface MarkdownSettings {
 	width?: string;
 
 	/**
+	 * Blockquote style (`.cm-blockquote` selector) 
+	 */
+	blockquote?: StyleSpec
+
+	/**
 	 * Image style (`.cm-img` selector)
 	 */
 	imgWidget?: StyleSpec;
@@ -287,6 +292,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		'&.cm-focused': {
 			outline: 'none' // Hide the outline of the focused editor
 		},
+		".cm-blockquote": opts.blockquote,
 		'.cm-img': opts.imgWidget,
 		'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
 		'.cm-scroller': {
