@@ -114,46 +114,54 @@ export function linkWidget() {
 	}
 
 	/**
-	 * Return widget decorations for Markdown links to hide the URL.
-	 *
-	 * If cursor is inside the URL, it won't return decoration for that link.
-	 * @param view
+	 * Walks up the syntax-tree ancestors of `nodeRef` and returns `true` if
+	 * it finds any ancestor whose type name is exactly `"Link"`. Otherwise `false`.
 	 */
-	function links(view: EditorView) {
+	function isInsideLinkNode(nodeRef: any): boolean {
+		let cursor = nodeRef.node; // TreeCursor passed into `enter`
+		while (cursor) {
+			if (cursor.name === "Link") return true;
+			cursor = cursor.parent;
+		}
+		return false;
+	}
+
+	/**
+	 * Iterate visible ranges, look for nodes named "URL" that are inside
+	 * a parent "Link", and replace them with a SymbolWidget. If the cursor
+	 * is inside that URL, skip decoration so the user can still edit it.
+	 */
+	function links(view: EditorView): DecorationSet {
 		const widgets: Range<Decoration>[] = [];
-		for (const { from, to } of view.visibleRanges) {
-			syntaxTree(view.state).iterate({
+		const { state, visibleRanges } = view;
+		const selection = view.state.selection
+
+		for (const { from, to } of visibleRanges) {
+			syntaxTree(state).iterate({
 				from,
 				to,
 				enter: (node) => {
-					const linkText = view.state.doc.sliceString(node.from, node.to);
+					// Only interested in leaf nodes whose name is "URL"
+					if (node.name !== "URL") return;
 
-					// Check that our cursor is not within the URL node
-					function isCursorWithinNode(cursorPos: number) {
-						return cursorPos >= node.from && cursorPos <= node.to;
-					}
+					// If this "URL" node is not part of a Link, skip it
+					if (!isInsideLinkNode(node)) return;
 
-					if (node.name == 'URL') {
-						// Don't create decoration for the URL in the following cases so the URL field stays open
-						if (view.state.selection.main.empty) {
-							// Keep URL field open when user's cursor is within the URL node
-							if (isCursorWithinNode(view.state.selection.main.head)) {
-								return
-							}
-						} else {
-							// Keep URL field open when selecting the URL (non-empty selection) and the
-							// anchor is within the URL node
-							if (isCursorWithinNode(view.state.selection.main.anchor)) {
-								return
-							}
-						}
+					// If cursor (or selection anchor) is within this URL, do not hide it
+					const sel = selection.main;
+					const insideCursor =
+						sel.empty
+							? sel.head >= node.from && sel.head <= node.to
+							: sel.anchor >= node.from && sel.anchor <= node.to;
+					if (insideCursor) return;
 
-						const deco = Decoration.replace({
-							widget: new SymbolWidget(linkText)
-						});
-						widgets.push(deco.range(node.from, node.to));
-					}
-				}
+					// Finally, decorate: replace the entire URL span with the widget
+					const linkText = state.doc.sliceString(node.from, node.to);
+					const deco = Decoration.replace({
+						widget: new SymbolWidget(linkText),
+					});
+					widgets.push(deco.range(node.from, node.to));
+				},
 			});
 		}
 		return Decoration.set(widgets);
@@ -168,7 +176,9 @@ export function linkWidget() {
 			}
 
 			update(update: ViewUpdate) {
-				// todo: this will update now after every change, even cursor change
+				// todo: this will update now after every change, even cursor change, but we need this 
+				// because link hiding is dependent on cursor position
+				// It's really if link has goten in or out of link node that we should update
 				//  Should do something like this: if (update.docChanged || update.viewportChanged)
 				this.decorations = links(update.view);
 			}
@@ -180,40 +190,41 @@ export function linkWidget() {
 }
 
 
+
 export const blockquoteStyling = ViewPlugin.fromClass(class {
-  decorations: DecorationSet
+	decorations: DecorationSet
 
-  constructor(view: EditorView) {
-    this.decorations = this.build(view);
-  }
+	constructor(view: EditorView) {
+		this.decorations = this.build(view);
+	}
 
-  update(update: ViewUpdate) {
-    if (update.docChanged || update.viewportChanged)
-      this.decorations = this.build(update.view);
-  }
+	update(update: ViewUpdate) {
+		if (update.docChanged || update.viewportChanged)
+			this.decorations = this.build(update.view);
+	}
 
-  /** Scan visible ranges, add a line decoration to every block-quote line */
-  build(view: EditorView) {
-    const builder = new RangeSetBuilder<Decoration>();
-    const tree = syntaxTree(view.state);
+	/** Scan visible ranges, add a line decoration to every block-quote line */
+	build(view: EditorView) {
+		const builder = new RangeSetBuilder<Decoration>();
+		const tree = syntaxTree(view.state);
 
-    tree.iterate({
-      enter(node) {
-        if (node.name === "Blockquote") {
-          let lnFrom = view.state.doc.lineAt(node.from).number;
-          let lnTo   = view.state.doc.lineAt(node.to).number;
-          for (let l = lnFrom; l <= lnTo; l++) {
-            let pos = view.state.doc.line(l).from;
-            builder.add(pos, pos, Decoration.line({class: "cm-blockquote"}));
-          }
-        }
-      },
-      // only look at what’s on screen for speed
-      from: view.viewport.from, to: view.viewport.to
-    });
-    return builder.finish();
-  }
-},{
-  decorations: v => v.decorations
+		tree.iterate({
+			enter(node) {
+				if (node.name === "Blockquote") {
+					let lnFrom = view.state.doc.lineAt(node.from).number;
+					let lnTo = view.state.doc.lineAt(node.to).number;
+					for (let l = lnFrom; l <= lnTo; l++) {
+						let pos = view.state.doc.line(l).from;
+						builder.add(pos, pos, Decoration.line({ class: "cm-blockquote" }));
+					}
+				}
+			},
+			// only look at what’s on screen for speed
+			from: view.viewport.from, to: view.viewport.to
+		});
+		return builder.finish();
+	}
+}, {
+	decorations: v => v.decorations
 });
 

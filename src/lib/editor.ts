@@ -4,7 +4,7 @@ import { languages } from '@codemirror/language-data';
 import { search } from '@codemirror/search';
 import { keymap, type KeyBinding } from '@codemirror/view';
 import { styleTags, tags as t } from '@lezer/highlight';
-import { Strikethrough, TaskList, type MarkdownConfig } from '@lezer/markdown';
+import { Strikethrough, TaskList, Autolink, type MarkdownConfig } from '@lezer/markdown';
 import { basicSetup, EditorView } from 'codemirror';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
@@ -142,7 +142,7 @@ export class UnifiedText {
 			search({top: true}),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			Prec.highest(keymap.of(formattingShortcuts)), // Use highest precedence to override default keymap
-			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, ExtendedStyles] }),
+			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, Autolink, ExtendedStyles] }),
 			autocompletion({
 				closeOnBlur: false,
 				activateOnTyping: true,

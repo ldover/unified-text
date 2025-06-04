@@ -15,6 +15,9 @@ Unordered:
 * list item 2
   * list item 2.1
 
+Here is a link: www.somelink.com
+
+
 Code \`inline\` and code block —
 
 \`\`\`
@@ -33,6 +36,7 @@ with text continuing on next line.
 And a few tasks:
 * [ ] Code a Bear theme
 * [ ] Code a Knowledge Universe theme
+
 
 ## Heading 2
 Some text.
@@ -81,7 +85,6 @@ As text
 		editor.on('scroll', (scroll) => console.log({scroll}))
 		editor.setElement(e.detail)
 		editor.setContent(content, '1')
-		editor.setEditable(false)
 		
 		plugin = editor.getHighlightPlugin()!
 		
