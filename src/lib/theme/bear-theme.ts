@@ -35,7 +35,13 @@ const settings: MarkdownSettings = {
 		borderLeft: `6px solid ${red}`,
 	},
 	width: '900px',
-
+	editorContent: {
+		margin: '0 auto',
+		padding: '0 24px',
+	},
+	line: {
+		padding: '0 24px',
+	},
 	requiredFonts: ['BearSansUI', 'BearSansUIHeadline', 'Roboto Mono'],
 	defaultFont: 'BearSansUI',
 	defaultFontSize: '18px',

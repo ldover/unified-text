@@ -184,7 +184,7 @@ export interface MarkdownSettings {
 	/**
 	 * Line padding
 	 */
-	linePadding?: StyleSpec
+	line?: StyleSpec
 
 	/**
 	 * Fonts required by this theme — used to check whether fonts are loaded
@@ -243,7 +243,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		defaultFont: 'Roboto',
 		defaultFontSize: '18px',
 		lineHeight: '170%',
-		linePadding: {},
+		line: {},
 		width: '900px',
 		imgWidget: {
 			maxHeight: '300px'
@@ -325,7 +325,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		},
 		'.cm-line': {
 			lineHeight: opts.lineHeight,
-			...opts.linePadding
+			...opts.line
 		},
 		'&.cm-focused .cm-cursor': {
 			borderLeftColor: opts.caret, // Caret
