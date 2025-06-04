@@ -100,4 +100,16 @@ describe('bold', () => {
 
 	it('handles overlapping formatting', () =>
 		test('some |bol**ded**| text', 'some **|bolded|** text'));
+
+	it('handles overlapping formatting without removing non-formatting signs', () =>
+		test('some |**bol** ** ded| text', 'some **|bol ** ded|** text'));
+
+	it('handles removing middle part of the formatted text', () =>
+		test('**some |bolded| text**', '**some** bolded **text**'));
+
+	it('handles removing left part of the formatted text', () =>
+		test('**|some| bolded text**', 'some **bolded text**'));
+
+	it('handles removing right part of the formatted text', () =>
+		test('**some bolded |text|**', '**some bolded** text'));
 });
