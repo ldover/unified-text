@@ -6,8 +6,9 @@ import {
 	EditorView,
 	ViewUpdate
 } from '@codemirror/view';
-import { RangeSetBuilder, type Range } from '@codemirror/state';
+import { RangeSetBuilder, type Range, EditorState } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
+import type { SyntaxNode } from '@lezer/common';
 
 /**
  * Returns an image plugin that renders images below the Markdown Image elements
@@ -120,7 +121,7 @@ export function linkWidget() {
 	function isInsideLinkNode(nodeRef: any): boolean {
 		let cursor = nodeRef.node; // TreeCursor passed into `enter`
 		while (cursor) {
-			if (cursor.name === "Link") return true;
+			if (cursor.name === "Link" || cursor.name == 'Image') return true;
 			cursor = cursor.parent;
 		}
 		return false;
@@ -167,26 +168,61 @@ export function linkWidget() {
 		return Decoration.set(widgets);
 	}
 
+	function urlRangeAt(state: EditorState, pos: number): {from: number; to: number} | null {
+		// Walk the concrete syntax tree at `pos`
+		let cur: SyntaxNode | null = syntaxTree(state).resolve(pos, 1);   // 1 = prefer leaves
+		while (cur) {
+		  if (cur.name === "URL") {
+			// Must also be inside a Link parent; bail otherwise
+			let p = cur.parent;
+			while (p && p.name !== "Link") p = p.parent;
+			if (p) return { from: cur.from, to: cur.to };
+			break;
+		  }
+		  cur = cur.parent;
+		}
+		return null;
+	  }
+
 	return ViewPlugin.fromClass(
 		class {
-			decorations: DecorationSet;
-
-			constructor(view: EditorView) {
-				this.decorations = links(view);
+		  decorations: DecorationSet;
+		  private activeUrl: { from: number; to: number } | null;
+	
+		  constructor(view: EditorView) {
+			this.decorations = links(view);                         // initial build
+			this.activeUrl = urlRangeAt(view.state, view.state.selection.main.head);
+		  }
+	
+		  update(update: ViewUpdate) {
+			// 1️⃣ Structural changes → always rebuild
+			if (update.docChanged || update.viewportChanged) {
+			  this.decorations = links(update.view);
+			  this.activeUrl = urlRangeAt(update.state, update.state.selection.main.head);
+			  return;
 			}
-
-			update(update: ViewUpdate) {
-				// todo: this will update now after every change, even cursor change, but we need this 
-				// because link hiding is dependent on cursor position
-				// It's really if link has goten in or out of link node that we should update
-				//  Should do something like this: if (update.docChanged || update.viewportChanged)
-				this.decorations = links(update.view);
+	
+			// 2️⃣ Pure cursor/selection moves
+			if (update.selectionSet) {
+			  const next = urlRangeAt(update.state, update.state.selection.main.head);
+	
+			  // If we’re still inside the same URL (or still outside any URL) do nothing
+			  const same =
+			  (this.activeUrl && next &&
+				this.activeUrl.from === next.from &&
+				this.activeUrl.to === next.to) ||
+				(!this.activeUrl && !next);
+				
+			  if (same) return;                     // skip expensive work
+	
+			  // Cursor entered or left a URL → rebuild decorations
+			  this.decorations = links(update.view);
+			  this.activeUrl = next;
 			}
+		  }
 		},
-		{
-			decorations: (v) => v.decorations,
-		}
-	);
+		{ decorations: v => v.decorations }
+	  );
 }
 
 
