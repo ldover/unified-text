@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Extension, StateCommand } from '@codemirror/state';
 import { EditorSelection, EditorState } from '@codemirror/state';
 import { markdown } from '@codemirror/lang-markdown';
-import { bold } from '../src/lib/commands.js';
+import { bold, emphasize } from '../src/lib/commands.js';
 
 function mkState(doc: string, extension?: Extension) {
 	const cursors = [];
@@ -63,9 +63,9 @@ function cmd(state: EditorState, command: StateCommand) {
 }
 
 describe('bold', () => {
-	function test(from: string, to: string, ext?: Extension) {
+	function test(from: string, to: string, command?: StateCommand, ext?: Extension,) {
 		const state = mkState(from, ext);
-		const out = stateStr(cmd(state, bold));
+		const out = stateStr(cmd(state, command ?? bold));
 		expect(out).toBe(to);
 	}
 
@@ -112,4 +112,7 @@ describe('bold', () => {
 
 	it('handles removing right part of the formatted text', () =>
 		test('**some bolded |text|**', '**some bolded** text'));
+
+	it('handles nested formatting', () =>
+		test('**|some bolded text|**', '***|some bolded text|***', emphasize));
 });
