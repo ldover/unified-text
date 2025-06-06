@@ -129,12 +129,8 @@ const styles: MarkdownNodeStyle[] = [
 		color: color.linkBracketGray
 	},
 	{
-		node: ['URL', 'ListMark', 'HardBreak', 'TaskMarker'],
+		node: ['URL', 'ListMark', 'QuoteMark', 'HardBreak', 'TaskMarker'],
 		color: color.red
-	},
-	{
-		node: 'QuoteMark',
-		color: color.linkBracketGray
 	},
 	{
 		node: 'CodeText',
