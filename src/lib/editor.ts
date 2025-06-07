@@ -238,6 +238,12 @@ export class UnifiedText {
 	getHighlightPlugin() {
 		return this.view!.plugin(highlightPlugin);
 	}
+
+	scrollIntoView(position: number): void {
+		this.view?.dispatch({
+			effects: EditorView.scrollIntoView(position, { y: "center" })
+		});
+	}
 	
 	getScroll(): number {
 		const eScroller = this.e.querySelector('.cm-scroller');
