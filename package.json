@@ -1,6 +1,23 @@
 {
 	"name": "unified-text",
 	"version": "1.14.7",
+	"author": "Luka Dover",
+	"email": "luka.dover@gmail.com",
+	"description": "Beautiful Markdown editor inspired by Bear",
+	"keywords": [
+		"svelte",
+		"markdown",
+		"editor",
+		"codemirror",
+		"theme"
+	],
+	"publishConfig": {
+	  "access": "public"
+	},
+	"repository": {
+	  "type": "git",
+	  "url": "git+https://github.com/ldover/unified-text.git"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",

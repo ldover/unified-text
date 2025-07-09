@@ -1,58 +1,101 @@
-# create-svelte
+# unified-text
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+> Beautiful Markdown editor inspired by Bear. *(Svelte · CodeMirror 6)*
 
-Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
+**⚠️ Work in progress – the public API is experimental and *will* change without notice.**
 
-## Creating a project
+---
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Installation
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm i unified-text          # or pnpm add / yarn add
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+---
 
-## Building
+## Quick start
 
-To build your library:
+```svelte
+<script lang="ts">
+  import Editor from 'unified-text/Editor.svelte';
+  import { bear } from 'unified-text/theme';
 
-```bash
-npm run package
+  let content = '# Hello world';
+</script>
+
+<Editor {content} theme={bear} on:mount={(e) => console.log('mounted', e.detail)} />
 ```
 
-To create a production version of your showcase app:
+Imperative usage:
 
-```bash
-npm run build
+```ts
+import { UnifiedText } from 'unified-text';
+import { bear } from 'unified-text/theme';
+
+const editor = new UnifiedText({
+  e: document.getElementById('editor')!,
+  theme: bear,
+  content: '# Hello world',
+});
 ```
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+## Editor options (`new UnifiedText(opts)`)
 
-## Publishing
 
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
+| name          | type                   | default | notes                                                                         |
+| ------------- | ---------------------- | ------- | ----------------------------------------------------------------------------- |
+| **`theme`**   | `ThemeOptions`         | –       | required; use pre-packaged themes `bear`, `oceanBlue`, or a custom theme from `createTheme()` |
+| `content`     | `string`               | `''`    | initial Markdown                                                              |
+| `completions` | `MarkdownCompletion[]` | `[]`    | extra autocomplete suggestions                                                |
+| `e`           | `HTMLElement`          | –       | mount point                            |
 
-To publish your library to [npm](https://www.npmjs.com):
+Common instance methods:
 
-```bash
-npm publish
+```ts
+setContent(markdown: string, id?: string)
+getContent(): string
+focus()
+setTheme(theme: ThemeOptions)
 ```
+
+---
+
+## Theming – `createTheme()`
+
+```ts
+import createTheme from 'unified-text/theme';
+import { tags as t } from '@lezer/highlight';
+
+const myTheme = createTheme({
+  settings: {
+    background: '#ffffff',
+    foreground: '#1f1f1f',
+    selection: '#c7d2fe',
+    caret: '#fb923c',
+    requiredFonts: ['Inter'],
+  },
+  styles: [
+    { node: 'ATXHeading1', fontSize: '2rem', fontWeight: 600 },
+    { node: ['BulletList', 'OrderedList'], marginLeft: '1rem' },
+  ],
+  codeStyles: [
+    { tag: t.keyword, fontWeight: 'bold' },
+  ],
+});
+```
+
+### Theme options
+
+| root key     | description                                                                     |
+| ------------ | ------------------------------------------------------------------------------- |
+| `settings`   | editor‑level style primitives (colors, spacing, fonts, etc.)                    |
+| `styles`     | per‑Markdown‑node style objects; `node` may be a single `MarkdownType` or array |
+| `codeStyles` | CodeMirror `TagStyle` array for fenced‑code blocks                              |
+| `icons?`     |  base64 SVGs to show in the autocomplete UI                                     |
+
+See `src/theme/*.js` for reference implementations (`bear`, `oceanBlue`).
+
+
