@@ -1,8 +1,8 @@
 # unified-text
 
-> Beautiful Markdown editor inspired by Bear. *(Svelte · CodeMirror 6)*
+Beautiful Markdown editor inspired by Bear. Powered by CodeMirror 6.*
 
-**⚠️ Work in progress – the public API is experimental and *will* change without notice.**
+> **⚠️ Work in progress – the public API is experimental and *will* change without notice.**
 
 ---
 
