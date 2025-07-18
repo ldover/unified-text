@@ -15,7 +15,8 @@ import { highlightPlugin } from './highlight.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
 import { extractLink, nodeAtPosition } from './util.js';
-import { blockquoteStyling, imageWidget, linkWidget } from './widgets.js';
+import { blockquoteStyling, imageWidget, katexPlugin, linkWidget } from './widgets.js';
+import MarkdownMathExtension from './tex-parser/MarkdownMathExtension.js';
 
 
 const editableCompartment = new Compartment();
@@ -50,6 +51,7 @@ interface EditorOptions {
 	content?: string;
 	completions?: MarkdownCompletion[];
 	theme: ThemeOptions;
+	katexEnabled?: boolean
 }
 
 function isFontAvailable(fontName: string) {
@@ -102,7 +104,7 @@ export class UnifiedText {
 
 	private readonly eventListeners: { [event: string]: Listener[] } = {};
 
-	constructor(options: EditorOptions) {
+	constructor(private options: EditorOptions) {
 		this.mdAutocomplete = new MarkdownAutocomplete(options.completions || []);
 
 		this.theme = options.theme;
@@ -142,13 +144,17 @@ export class UnifiedText {
 			search({top: true}),
 			keymap.of([indentWithTab, ...completionKeymap, ...startAutocompleteKeymap]),
 			Prec.highest(keymap.of(formattingShortcuts)), // Use highest precedence to override default keymap
-			markdown({ codeLanguages: languages, extensions: [Strikethrough, TaskList, Autolink, ExtendedStyles] }),
+			markdown({ codeLanguages: languages, extensions: [
+				Strikethrough, TaskList, Autolink, ExtendedStyles,
+				this.options.katexEnabled ? MarkdownMathExtension : [],
+			] }),
 			autocompletion({
 				closeOnBlur: false,
 				activateOnTyping: true,
 				override: [(context) => this.mdAutocomplete.autocomplete(context)]
 			}),
 			linkWidget(),
+			katexPlugin,
 			highlightPlugin,
 			blockquoteStyling,
 			imageWidget(),

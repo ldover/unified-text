@@ -9,7 +9,9 @@ import {
 import { RangeSetBuilder, type Range, EditorState } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
-
+import katex from 'katex';
+// In your main bundle (e.g. index.ts or widgets.ts)
+import 'katex/dist/katex.min.css';
 /**
  * Returns an image plugin that renders images below the Markdown Image elements
  */
@@ -264,3 +266,93 @@ export const blockquoteStyling = ViewPlugin.fromClass(class {
 	decorations: v => v.decorations
 });
 
+class MathWidget extends WidgetType {
+	readonly code: string;
+  
+	constructor(code: string) {
+	  super();
+	  this.code = code;
+	}
+  
+	eq(other: MathWidget): boolean {
+	  return other.code === this.code
+	}
+  
+	toDOM(): HTMLElement {
+	  const el = document.createElement('span');
+	  try {
+		const str = katex.renderToString(this.code);
+		console.log('katex', {str})
+		el.innerHTML = str
+		el.classList.remove('katex-error')
+
+		el.removeAttribute('title');
+	  } catch (err) {
+		el.textContent = this.code;
+		el.classList.add('katex-error')
+
+		// attach the error message as a tooltip
+		el.title = err?.message ?? String(err);
+	  }
+	  return el;
+	}
+  
+	ignoreEvent(): boolean {
+	  return true;
+	}
+  }
+  
+  export const katexPlugin = ViewPlugin.fromClass(
+	class {
+	  decorations: DecorationSet;
+  
+	  constructor(view: EditorView) {
+		this.decorations = this.build(view);
+	  }
+  
+	  update(update: ViewUpdate): void {
+		this.decorations = this.build(update.view);
+	  }
+
+	  build(view: EditorView): DecorationSet {
+		const decos: Range<Decoration>[] = [];
+		const { state, viewport } = view;
+		const sel = state.selection.main;
+		const tree = syntaxTree(state);
+	  
+		tree.iterate({
+		  from: viewport.from,
+		  to:   viewport.to,
+		  enter: ({ name, from, to }: { name: string; from: number; to: number }) => {
+			if (name !== 'InlineMath') return;
+	  
+			// if cursor is anywhere inside the $…$ / $$…$$, skip decorating
+			if (sel.head > from && sel.head < to) return;
+	  
+			// compute inner range (strip delimiters)
+			const delim = 1;
+			const innerFrom = from + delim;
+			const innerTo   = to   - delim;
+	  
+			// grab raw TeX code
+			const code = state.doc.sliceString(innerFrom, innerTo);
+	  
+			// replace _only_ the inner range with our widget
+			decos.push(
+			  Decoration.replace({
+				widget: new MathWidget(code)
+			  }).range(innerFrom, innerTo)
+			);
+		  }
+		});
+	  
+		return Decoration.set(decos);
+	  }
+	},
+	{
+	  decorations: (v: { decorations: DecorationSet }) => v.decorations
+	}
+  );
+  
+  
+  

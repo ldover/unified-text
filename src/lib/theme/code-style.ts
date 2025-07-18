@@ -11,7 +11,6 @@ const espresso: TagStyle[] = [
 	{
 		tag: [t.keyword, t.operator, t.typeName, t.tagName, t.propertyName],
 		color: '#2F6F9F',
-		fontWeight: 'bold',
 		fontFamily: 'Roboto Mono, monospace'
 	},
 	{
@@ -27,12 +26,10 @@ const espresso: TagStyle[] = [
 	{
 		tag: t.number,
 		color: '#CF4F5F',
-		fontWeight: 'bold',
 		fontFamily: 'Roboto Mono, monospace'
 	},
 	{
 		tag: t.variableName,
-		fontWeight: 'bold',
 		fontFamily: 'Roboto Mono, monospace'
 	}
 ];

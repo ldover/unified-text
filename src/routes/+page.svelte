@@ -46,7 +46,13 @@ Almost
 #### heading 4
 As text
 ##### heading 5
-###### heading 6`;
+###### heading 6 
+
+## Math
+
+Euler's identity is $e^{i\pi} + 1 = 0$ in one elegant formula.
+
+`;
 
 
 	let editor: UnifiedText;
@@ -77,6 +83,7 @@ As text
 			theme: bear,
 			content,
 			completions: completions,
+			katexEnabled: true
 		})
 
 		editor.on('link-click', (url) => console.log({url}))

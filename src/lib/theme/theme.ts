@@ -3,6 +3,7 @@ import type { Extension } from '@codemirror/state';
 import type { StyleSpec } from 'style-mod';
 import { HighlightStyle, type TagStyle, syntaxHighlighting } from '@codemirror/language';
 import {Tag, tags, tags as t} from "@lezer/highlight";
+import { inlineMathTag, mathTag } from '$lib/tex-parser/MarkdownMathExtension.js';
 
 
 export type MarkdownType = 'Document' |
@@ -351,6 +352,12 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			padding: '8px',
 			backgroundColor: opts.background
 		},
+		'.katex-error': {
+			textDecorationLine: 'underline',
+			textDecorationStyle: 'wavy',
+			textDecorationColor: 'red',
+			textUnderlinePosition: 'under'
+		  },
 		...addStyles,
 		".cm-completionIcon": {
 			fontSize: "90%",
@@ -457,7 +464,16 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 	}
 
 	const markdownStyles = toTagStyles(styles);
-	const highlightStyle = HighlightStyle.define([...markdownStyles, ...codeStyles]);
+	const highlightStyle = HighlightStyle.define([
+		...markdownStyles, 
+		...codeStyles,
+
+		{
+			tag: [mathTag, inlineMathTag],
+			color: '#DE4C4F'
+		},
+	
+	]);
 	const extension = [theme, syntaxHighlighting(highlightStyle)];
 
 	return extension;
