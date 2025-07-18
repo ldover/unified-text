@@ -52,7 +52,9 @@ export type MarkdownType = 'Document' |
 	'Strikethrough' |      // extension
 	'StrikethroughMark' |  // extension
 	'TaskList' |           // extension
-	'TaskMarker';          // extension
+	'TaskMarker' |         // extension
+	'InlineMath' |         // extension
+	'BlockMath';           // extension
 
 
 const toTag = (node: MarkdownType) : Tag => {
@@ -94,6 +96,8 @@ const toTag = (node: MarkdownType) : Tag => {
 		HardBreak: tags.special(tags.processingInstruction),  // custom
 		CodeText: tags.special(tags.monospace), // custom
 		CodeInfo: tags.special(tags.labelName), // custom
+		InlineMath: inlineMathTag,  // extension
+		BlockMath: mathTag  // extension
 	}
 
 	const tag = map[node]
@@ -467,12 +471,6 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 	const highlightStyle = HighlightStyle.define([
 		...markdownStyles, 
 		...codeStyles,
-
-		{
-			tag: [mathTag, inlineMathTag],
-			color: '#DE4C4F'
-		},
-	
 	]);
 	const extension = [theme, syntaxHighlighting(highlightStyle)];
 

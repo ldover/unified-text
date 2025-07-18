@@ -136,7 +136,11 @@ const styles: MarkdownNodeStyle[] = [
 		node: 'CodeText',
 		fontFamily: 'Roboto Mono, monospace',
 		color: color.strikethroughGray
-	}
+	},
+	{
+		node: 'InlineMath',
+		color: '#DE4C4F'
+	},
 ];
 
 export const bear: ThemeOptions = {
