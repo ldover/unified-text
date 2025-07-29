@@ -189,38 +189,13 @@ export function linkWidget() {
 	return ViewPlugin.fromClass(
 		class {
 		  decorations: DecorationSet;
-		  private activeUrl: { from: number; to: number } | null;
 	
 		  constructor(view: EditorView) {
 			this.decorations = links(view);                         // initial build
-			this.activeUrl = urlRangeAt(view.state, view.state.selection.main.head);
 		  }
 	
-		  update(update: ViewUpdate) {
-			// 1️⃣ Structural changes → always rebuild
-			if (update.docChanged || update.viewportChanged) {
-			  this.decorations = links(update.view);
-			  this.activeUrl = urlRangeAt(update.state, update.state.selection.main.head);
-			  return;
-			}
-	
-			// 2️⃣ Pure cursor/selection moves
-			if (update.selectionSet) {
-			  const next = urlRangeAt(update.state, update.state.selection.main.head);
-	
-			  // If we’re still inside the same URL (or still outside any URL) do nothing
-			  const same =
-			  (this.activeUrl && next &&
-				this.activeUrl.from === next.from &&
-				this.activeUrl.to === next.to) ||
-				(!this.activeUrl && !next);
-				
-			  if (same) return;                     // skip expensive work
-	
-			  // Cursor entered or left a URL → rebuild decorations
-			  this.decorations = links(update.view);
-			  this.activeUrl = next;
-			}
+		  update(update: ViewUpdate) {	
+			this.decorations = links(update.view);
 		  }
 		},
 		{ decorations: v => v.decorations }
@@ -298,7 +273,7 @@ class MathWidget extends WidgetType {
 	}
   
 	ignoreEvent(): boolean {
-	  return true;
+	  return false;
 	}
   }
   
@@ -319,28 +294,33 @@ class MathWidget extends WidgetType {
 		const { state, viewport } = view;
 		const sel = state.selection.main;
 		const tree = syntaxTree(state);
+
 	  
 		tree.iterate({
 		  from: viewport.from,
 		  to:   viewport.to,
-		  enter: ({ name, from, to }: { name: string; from: number; to: number }) => {
-			if (name !== 'InlineMath') return;
+		  enter: (node) => {
+
+			if (node.name !== 'InlineMath') return;
+
+			const innerFrom = node.from + 1;   // strip leading $
+			const innerTo   = node.to   - 1;   // strip trailing $
 	  
-			// if cursor is anywhere inside the $…$ / $$…$$, skip decorating
-			if (sel.head > from && sel.head < to) return;
+			// true when a position sits strictly inside the TeX code
+			const inside = (pos: number) => pos > node.from && pos < node.to;
 	  
-			// compute inner range (strip delimiters)
-			const delim = 1;
-			const innerFrom = from + delim;
-			const innerTo   = to   - delim;
+			// Skip decoration only if the WHOLE selection is inside
+			// (caret inside OR both anchor & head inside). */
+			if (
+			  (sel.empty  && inside(sel.head)) ||
+			  (!sel.empty && inside(sel.head) && inside(sel.anchor))
+			) return;
 	  
-			// grab raw TeX code
 			const code = state.doc.sliceString(innerFrom, innerTo);
 	  
-			// replace _only_ the inner range with our widget
 			decos.push(
 			  Decoration.replace({
-				widget: new MathWidget(code)
+				widget: new MathWidget(code),
 			  }).range(innerFrom, innerTo)
 			);
 		  }
