@@ -125,7 +125,7 @@ const styles: MarkdownNodeStyle[] = [
 		color: color.strikethroughGray
 	},
 	{
-		node: ['EmphasisMark', 'LinkMark', 'CodeMark'],
+		node: ['EmphasisMark', 'LinkMark', 'CodeMark', 'InlineMath'],
 		color: color.linkBracketGray
 	},
 	{
@@ -136,10 +136,6 @@ const styles: MarkdownNodeStyle[] = [
 		node: 'CodeText',
 		fontFamily: 'Roboto Mono, monospace',
 		color: color.strikethroughGray
-	},
-	{
-		node: 'InlineMath',
-		color: '#DE4C4F'
 	},
 ];
 
