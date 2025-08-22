@@ -6,7 +6,7 @@ import {
 	EditorView,
 	ViewUpdate
 } from '@codemirror/view';
-import { RangeSetBuilder, type Range, EditorState } from '@codemirror/state';
+import { RangeSetBuilder, type Range, EditorState, StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import type { SyntaxNode } from '@lezer/common';
 import katex from 'katex';
@@ -334,5 +334,112 @@ class MathWidget extends WidgetType {
 	}
   );
   
+  class DisplayMathWidget extends WidgetType {
+	constructor(readonly code: string, readonly innerFrom: number) {
+	  super();
+	}
+	eq(other: DisplayMathWidget) {
+	  return other.code === this.code && other.innerFrom === this.innerFrom;
+	}
+	toDOM(view: EditorView) {
+	  const el = document.createElement('div');
+	  el.className = 'cm-math-block';
+	  try {
+		katex.render(this.code, el, { displayMode: true, throwOnError: true });
+		el.classList.remove('katex-error');
+		el.removeAttribute('title');
+	  } catch (err: any) {
+		el.textContent = this.code;
+		el.classList.add('katex-error');
+		el.title = err?.message ?? String(err);
+	  }
+  
+	  // Click to jump caret inside the block for editing
+	  el.addEventListener('mousedown', (e) => {
+		e.preventDefault();
+		view.dispatch({ selection: { anchor: this.innerFrom }, scrollIntoView: true });
+		view.focus();
+	  });
+  
+	  return el;
+	}
+	ignoreEvent() { return false; }
+  }
+
+
+/** Lines that are exactly `$$` (allowing surrounding whitespace) */
+const isFenceLine = (text: string) => /^\s*\$\$\s*$/.test(text);
+
+/**
+ * Compute inner content range and code for a BlockMath node.
+ * Keeps the surrounding `$$` lines visible by targeting only the inner range.
+ */
+function blockMathInner(state: EditorState, from: number, to: number) {
+  const first = state.doc.lineAt(from);
+  const last = state.doc.lineAt(to);
+
+  let innerFrom = from;
+  let innerTo = to;
+
+  if (isFenceLine(first.text)) innerFrom = first.to + 1; // char after opening fence line break
+  if (isFenceLine(last.text))  innerTo   = last.from - 1; // char before closing fence line start
+
+  if (innerFrom < from) innerFrom = from;
+  if (innerTo > to) innerTo = to;
+  if (innerFrom > innerTo) innerFrom = innerTo;
+
+  const code = state.doc.sliceString(innerFrom, innerTo);
+  return { innerFrom, innerTo, code };
+}
+
+function buildDecos(state: EditorState): DecorationSet {
+  const sel = state.selection.main;
+  const builder = new RangeSetBuilder<Decoration>();
+
+  syntaxTree(state).iterate({
+    enter(n) {
+      if (n.name !== 'BlockMath') return;
+
+      const { innerFrom, innerTo, code } = blockMathInner(state, n.from, n.to);
+      if (!code) return;
+
+      const inside = (pos: number) => pos > innerFrom - 2 && pos < innerTo + 2;
+      const selectionInside =
+        (sel.empty && inside(sel.head)) ||
+        (!sel.empty && inside(sel.head) && inside(sel.anchor));
+
+      // If editing inside the content, don't hide it.
+      if (selectionInside) return;
+
+      // Replace ONLY the inner content (multi-line allowed here via StateField)
+      builder.add(
+        innerFrom,
+        innerTo,
+        Decoration.replace({
+          block: true,
+          inclusive: false,
+          widget: new DisplayMathWidget(code, innerFrom),
+        })
+      );
+    }
+  });
+
+  return builder.finish();
+}
+
+  
+  export const MathBlockWidget = StateField.define<DecorationSet>({
+	create(state) {
+	  return buildDecos(state);
+	},
+	update(value, tr) {
+	  // map existing decos through edits
+	  if (tr.docChanged) value = value.map(tr.changes);
+	  // rebuild when doc or selection changes (selection controls show/hide)
+	  if (tr.docChanged || tr.selection) return buildDecos(tr.state);
+	  return value;
+	},
+	provide: f => EditorView.decorations.from(f)
+  });
   
   

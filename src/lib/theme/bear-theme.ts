@@ -125,7 +125,7 @@ const styles: MarkdownNodeStyle[] = [
 		color: color.strikethroughGray
 	},
 	{
-		node: ['EmphasisMark', 'LinkMark', 'CodeMark', 'InlineMath'],
+		node: ['EmphasisMark', 'LinkMark', 'CodeMark', 'InlineMath', 'BlockMath'],
 		color: color.linkBracketGray
 	},
 	{

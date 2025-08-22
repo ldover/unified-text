@@ -15,7 +15,7 @@ import { highlightPlugin } from './highlight.js';
 import type { ThemeOptions } from './theme/theme.js';
 import createTheme from './theme/theme.js';
 import { extractLink, nodeAtPosition } from './util.js';
-import { blockquoteStyling, imageWidget, katexPlugin, linkWidget } from './widgets.js';
+import { MathBlockWidget, blockquoteStyling, imageWidget, katexPlugin, linkWidget } from './widgets.js';
 import MarkdownMathExtension from './tex-parser/MarkdownMathExtension.js';
 
 
@@ -155,6 +155,7 @@ export class UnifiedText {
 			}),
 			linkWidget(),
 			katexPlugin,
+			MathBlockWidget,
 			highlightPlugin,
 			blockquoteStyling,
 			imageWidget(),

@@ -362,6 +362,7 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			textDecorationColor: 'red',
 			textUnderlinePosition: 'under'
 		  },
+		  '.cm-math-block': { padding: '0.5rem 0' },
 		...addStyles,
 		".cm-completionIcon": {
 			fontSize: "90%",
