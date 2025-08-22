@@ -381,8 +381,8 @@ function blockMathInner(state: EditorState, from: number, to: number) {
   let innerFrom = from;
   let innerTo = to;
 
-  if (isFenceLine(first.text)) innerFrom = first.to + 1; // char after opening fence line break
-  if (isFenceLine(last.text))  innerTo   = last.from - 1; // char before closing fence line start
+  if (isFenceLine(first.text)) innerFrom = first.to;
+  if (isFenceLine(last.text))  innerTo   = last.from;
 
   if (innerFrom < from) innerFrom = from;
   if (innerTo > to) innerTo = to;

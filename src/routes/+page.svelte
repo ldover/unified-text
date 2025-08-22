@@ -50,7 +50,18 @@ As text
 
 ## Math
 
-Euler's identity is $e^{i\pi} + 1 = 0$ in one elegant formula.
+Euler's identity is $e^{i\\pi} + 1 = 0$ in one elegant formula.
+
+Test —
+
+$$
+R_{\\mu\\nu} - \\tfrac{1}{2}R g_{\\mu\\nu} + \\Lambda g_{\\mu\\nu}
+= \\tfrac{8\\pi G}{c^4} T_{\\mu\\nu}
+$$
+
+
+---
+
 
 `;
 
@@ -134,7 +145,7 @@ Euler's identity is $e^{i\pi} + 1 = 0$ in one elegant formula.
 
 <style>
 	.editor-container {
-		width: 50%;
+		width: 100%;
 		height: 100%;
 		/*max-height: 700px;*/
 		border: 1px solid black;
