@@ -230,6 +230,10 @@ export const blockquoteStyling = ViewPlugin.fromClass(class {
 						let pos = view.state.doc.line(l).from;
 						builder.add(pos, pos, Decoration.line({ class: "cm-blockquote" }));
 					}
+
+					// critical: skip children so nested blockquotes don't add earlier ranges later
+					// note: for now we don't support styling for nested blockquotes
+					return false;
 				}
 			},
 			// only look at what’s on screen for speed
