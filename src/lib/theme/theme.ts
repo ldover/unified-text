@@ -232,6 +232,11 @@ export interface MarkdownSettings {
 	editorContent?: StyleSpec
 
 	/**
+	 * Editor scroller style (`cm-scroller`)
+	 */
+	editorScroller?: StyleSpec
+
+	/**
 	 * Higlight style
 	 */
 	higlight?: StyleSpec
@@ -264,7 +269,8 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 			backgroundColor: 'yellow',
 			border: "1px solid black"
 		},
-		editorContent: {}
+		editorContent: {},
+		editorScroller: {}
 	};
 
 	const opts = Object.assign({}, defaults, settings || {});
@@ -302,12 +308,10 @@ const createTheme = ({ dark, settings, styles, codeStyles, icons }: ThemeOptions
 		'.cm-hidden-url': opts.urlWidget, // Style for hidden url widget "..." in: "[title](...)"
 		'.cm-scroller': {
 			paddingTop: '40px',
-			// paddingRight: '64px',
-			// paddingLeft: '84px', // Adjust for  MacOS traffic lights: todo: abstraction leak from Tiger -> text editor
-
 			paddingBottom: '50%', // Add bottom padding so user can scroll past the editor content
 			width: '100%',
-			justifyContent: 'center'
+			justifyContent: 'center',
+			...opts.editorScroller
 		},
 		'.cm-content': {
 			caretColor: opts.caret,
