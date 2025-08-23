@@ -8,7 +8,7 @@ import { Strikethrough, TaskList, Autolink, type MarkdownConfig } from '@lezer/m
 import { basicSetup, EditorView } from 'codemirror';
 
 import { autocompletion, completionKeymap, startCompletion } from '@codemirror/autocomplete';
-import { EditorSelection, Prec, SelectionRange, Compartment } from '@codemirror/state';
+import { EditorSelection, Prec, SelectionRange, Compartment, StateEffect } from '@codemirror/state';
 import { bold, emphasize, strikethrough } from './commands.js';
 import { MarkdownAutocomplete, type MarkdownCompletion } from './completions.js';
 import { highlightPlugin } from './highlight.js';
@@ -278,8 +278,12 @@ export class UnifiedText {
 				eScroller.scrollTop = scrollTop;
 				attempts++;
 				requestAnimationFrame(setScrollPosition);
-			} else if (eScroller.scrollTop !== scrollTop){
-				console.warn('Scroll position failed to restore: max attempts reached');
+			} else {
+				if (eScroller.scrollTop !== scrollTop){
+					console.warn('Scroll position failed to restore: max attempts reached');
+				}
+
+				this.forceRefreshPlugins()
 			}
 		};
 
@@ -381,5 +385,9 @@ export class UnifiedText {
 			this.prevSelection = selection;
 			this.emit('selection-change', selection, this.id!);
 		}
+	}
+
+	private forceRefreshPlugins() {
+		this.view?.dispatch({ effects: StateEffect.appendConfig.of([]) });
 	}
 }
